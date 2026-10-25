@@ -1,0 +1,885 @@
+# PROJECT: JARVIS — Fully Local Autonomous AI Desktop Assistant
+
+## 1. CORE OBJECTIVE
+
+Act as an expert AI engineer, Windows application developer, automation engineer, and UI/UX designer.
+
+Build a complete, production-quality Windows desktop application distributed as a standalone `.exe` called **JARVIS**.
+
+JARVIS is an intelligent, voice-controlled desktop AI assistant that runs entirely locally on the user's computer.
+
+It must use a locally installed Ollama model as its primary intelligence engine. It must NOT depend on OpenAI APIs, paid APIs, cloud AI services, or external AI subscriptions.
+
+The user should be able to communicate naturally with JARVIS, give it instructions, and watch it autonomously perform those instructions on their computer.
+
+JARVIS should function similarly to a real-world AI computer assistant.
+
+**The fundamental concept:**
+
+The user tells JARVIS what to do. JARVIS understands the request, observes the computer, plans the necessary actions, executes them, checks whether they worked, and reports back to the user.
+
+For example:
+
+User: "Open Spotify and play Kanye West's Violent Crimes."
+
+JARVIS should:
+1. Understand the instruction.
+2. Check whether Spotify is already running.
+3. Launch Spotify if necessary.
+4. Wait until Spotify has finished loading.
+5. Observe the Spotify interface.
+6. Locate the search function.
+7. Search for "Violent Crimes Kanye West".
+8. Identify the correct result.
+9. Open the song.
+10. Start playback.
+11. Verify that the song is actually playing.
+12. Respond through TTS: "Playing Violent Crimes by Kanye West."
+
+This must happen autonomously without requiring the user to guide every individual step.
+
+---
+
+# 2. LOCAL AI INTELLIGENCE — OLLAMA
+
+Ollama must be the primary AI backend.
+
+Requirements:
+
+- Automatically detect whether Ollama is installed.
+- Connect to the local Ollama server.
+- Detect which models are installed.
+- Allow the user to select their preferred model.
+- Display the currently active model.
+- Allow models to be changed without restarting the application.
+- Handle Ollama connection failures gracefully.
+- Never require an internet connection for normal AI operation.
+
+The application should have a model management section that displays installed models and allows users to select them.
+
+Support:
+- Text generation.
+- Tool calling.
+- Structured JSON responses.
+- Multimodal image input where supported.
+- Context retention.
+- Streaming responses.
+
+The application should use a fast, efficient local model for everyday commands while supporting more capable models for complicated tasks.
+
+Do not assume every Ollama model supports vision or tool calling. Detect model capabilities and handle unsupported features appropriately.
+
+Allow the AI to use different models for different tasks if configured.
+
+For example:
+- Main model: reasoning and decision-making.
+- Vision model: understanding screenshots.
+- Optional lightweight model: simple intent classification.
+
+Keep model switching configurable rather than hardcoding specific models.
+
+## Hardware optimisation
+
+The application is designed for a Windows gaming laptop with:
+
+- NVIDIA RTX 5070 Laptop GPU, 8GB VRAM.
+- Intel Core i7-13650HK.
+- 24GB RAM.
+- 1TB SSD.
+
+Optimise GPU acceleration through Ollama where available.
+
+Requirements:
+- Avoid unnecessarily loading multiple large models simultaneously.
+- Keep VRAM consumption under control.
+- Support quantised models.
+- Use streaming responses.
+- Avoid unnecessary model calls.
+- Use lightweight processing for simple tasks.
+- Provide configurable CPU/GPU model offloading.
+- Avoid excessive background resource consumption.
+
+The application should remain responsive while other programs are running.
+
+---
+
+# 3. AUTONOMOUS COMPUTER CONTROL
+
+This is the most important feature.
+
+JARVIS must be able to actually operate Windows, not simply explain how to do things.
+
+It should have access to an extensible collection of computer-control tools.
+
+### Mouse control
+- Move the cursor.
+- Click.
+- Double-click.
+- Right-click.
+- Scroll.
+- Drag and drop.
+- Identify clickable interface elements.
+
+### Keyboard control
+- Type text.
+- Press individual keys.
+- Execute keyboard shortcuts.
+- Use key combinations.
+- Navigate menus.
+- Switch between windows.
+
+### Windows control
+- Open applications.
+- Close applications.
+- Minimise and maximise windows.
+- Switch between applications.
+- Detect running processes.
+- Manage application windows.
+- Launch files and folders.
+- Interact with Windows settings.
+
+### File management
+
+JARVIS should be capable of:
+- Finding files.
+- Opening files.
+- Creating folders.
+- Renaming files.
+- Moving files.
+- Organising directories.
+- Searching for documents.
+- Reading supported documents.
+
+Require explicit permission before permanently deleting files or performing other destructive operations.
+
+### Execution verification
+
+Never assume an action succeeded.
+
+After executing an action, JARVIS should check the result.
+
+For example:
+
+If it clicks Spotify's search bar, it should verify that the search bar is active before typing.
+
+If it launches an application, it should verify that the application opened.
+
+If it encounters an error, it should attempt to understand and resolve it.
+
+---
+
+# 4. COMPUTER VISION — JARVIS CAN SEE
+
+JARVIS must have the ability to visually understand the user's desktop.
+
+Implement a screen observation system.
+
+Capabilities:
+
+- Capture screenshots of the desktop.
+- Capture individual application windows.
+- Understand application layouts.
+- Identify buttons, menus, text, icons and interface elements.
+- Read visible text using OCR.
+- Recognise errors and pop-ups.
+- Identify loading screens.
+- Understand what is currently happening on the screen.
+- Locate interface elements based on natural language instructions.
+
+The vision system should combine screenshot analysis, OCR, and accessibility/UI Automation information where appropriate.
+
+JARVIS should not rely exclusively on fixed screen coordinates.
+
+It should understand the interface and locate elements dynamically.
+
+### Continuous observation
+
+Implement an intelligent observation loop.
+
+JARVIS should:
+1. Capture the current screen.
+2. Interpret the relevant information.
+3. Decide what action is necessary.
+4. Execute that action.
+5. Observe the updated screen.
+6. Determine whether another action is necessary.
+
+Avoid taking screenshots continuously when nothing is happening.
+
+Use event-driven observation and configurable screenshot intervals to minimise resource usage.
+
+The user should also be able to ask:
+
+- "What am I looking at?"
+- "What's happening on my screen?"
+- "Why isn't this application working?"
+- "Find the settings button."
+- "Read what's on the screen."
+- "What error am I getting?"
+
+JARVIS should respond based on what it can actually see.
+
+---
+
+# 5. VOICE RECOGNITION — HEARING THE USER
+
+Implement fast, reliable speech recognition.
+
+The user should be able to speak naturally rather than having to memorise commands.
+
+Requirements:
+- Local speech-to-text.
+- Microphone input.
+- Natural language understanding.
+- Background noise handling.
+- Configurable microphone.
+- Configurable activation method.
+- Interruptible speech recognition.
+- Fast transcription.
+- Support for Australian English.
+
+Use an efficient local speech recognition solution such as faster-whisper or another suitable offline alternative.
+
+### Wake word
+
+Implement an optional wake word system.
+
+The user should be able to activate JARVIS by saying:
+
+"Hey JARVIS."
+
+Also include:
+- Push-to-talk.
+- A clickable microphone button.
+- Optional continuous listening.
+
+The user must be able to disable microphone listening completely.
+
+---
+
+# 6. TEXT-TO-SPEECH — JARVIS CAN SPEAK
+
+JARVIS must have a high-quality, natural-sounding voice.
+
+It should sound like an intelligent AI assistant rather than a robotic text-to-speech reader.
+
+Requirements:
+- Local TTS.
+- Fast speech generation.
+- Natural pronunciation.
+- Configurable voice.
+- Adjustable speaking speed.
+- Adjustable volume.
+- Streaming or chunked speech generation.
+- Immediate interruption when the user starts speaking.
+- No unnecessary pauses between sentences.
+
+Use a suitable offline TTS engine such as Piper or another lightweight, high-quality local solution.
+
+### Speech behaviour
+
+JARVIS should communicate naturally and concisely.
+
+Examples:
+
+"Certainly. Opening Spotify."
+
+"Done. The song is now playing."
+
+"I couldn't locate that application. Would you like me to search for it?"
+
+"One moment. I'm checking."
+
+Avoid unnecessarily explaining every individual mouse movement.
+
+The assistant should provide short progress updates for longer tasks.
+
+---
+
+# 7. AUTONOMOUS REASONING AND TASK PLANNING
+
+JARVIS must have an agent architecture.
+
+Do not build a simple chatbot that responds with instructions.
+
+It must be capable of breaking down complicated requests into individual actions.
+
+Example:
+
+User: "Open YouTube, find a video about Blender procedural animation, and put it into full screen."
+
+JARVIS internally creates a plan:
+
+1. Check if a browser is running.
+2. Open the browser.
+3. Navigate to YouTube.
+4. Wait for the website to load.
+5. Locate the search field.
+6. Search for Blender procedural animation.
+7. Inspect the results.
+8. Select an appropriate video.
+9. Wait for playback.
+10. Enter full-screen mode.
+11. Verify the result.
+
+The user should only need to give the original instruction.
+
+### Agent architecture
+
+Implement:
+- Intent recognition.
+- Task planning.
+- Action execution.
+- Screen observation.
+- Result verification.
+- Error detection.
+- Recovery attempts.
+- Task completion reporting.
+
+Use a structured tool-calling system.
+
+The AI should select tools dynamically based on what it needs to accomplish.
+
+Implement sensible limits on repeated actions to prevent infinite loops.
+
+If an action repeatedly fails, JARVIS should try another approach or ask the user for assistance.
+
+### Complex commands
+
+Support instructions such as:
+
+- "Open After Effects and create a new composition."
+- "Find my latest Minecraft screenshot."
+- "Open Chrome and search for the latest NVIDIA drivers."
+- "Open Discord and check whether I have any unread messages."
+- "Open Spotify and play my favourite music."
+- "Find the largest files in my downloads folder."
+- "Open my latest video project."
+- "Turn on dark mode."
+- "Explain what's wrong with this application."
+
+These are examples of intended functionality, not hardcoded commands.
+
+JARVIS must generalise to new applications and unfamiliar interfaces.
+
+---
+
+# 8. APPLICATION INTEGRATIONS
+
+Where possible, use reliable native integrations instead of relying exclusively on mouse automation.
+
+Examples:
+
+### Spotify
+- Launch Spotify.
+- Search for songs and artists.
+- Play and pause music.
+- Skip tracks.
+- Control volume.
+- Identify currently playing music.
+
+### Web browsers
+- Open websites.
+- Search the web.
+- Navigate pages.
+- Interact with visible website elements.
+
+### Windows
+- Manage windows.
+- Open settings.
+- Open supported system functions.
+
+### File Explorer
+- Navigate folders.
+- Search files.
+- Open documents.
+
+### Other applications
+- Detect installed applications.
+- Launch applications by name.
+- Interact with their interfaces through Windows UI Automation and visual recognition.
+
+Use application-specific APIs or integrations when available and permitted. Otherwise, fall back to visual desktop automation.
+
+---
+
+# 9. JARVIS MEMORY
+
+Implement persistent local memory.
+
+JARVIS should remember useful information between conversations.
+
+Examples:
+- User preferences.
+- Frequently used applications.
+- Common commands.
+- Preferred music.
+- Frequently accessed folders.
+- Previously completed tasks.
+- User-defined shortcuts.
+
+Store memory locally using SQLite or another lightweight database.
+
+The user must be able to:
+- View saved memories.
+- Edit memories.
+- Delete memories.
+- Disable memory.
+- Clear all stored conversation history.
+
+Never send private memory to external services.
+
+---
+
+# 10. USER INTERFACE — FUTURISTIC JARVIS DESIGN
+
+The application must have a sophisticated, futuristic interface inspired by the computer interfaces seen in Iron Man.
+
+It should look like a professional AI command centre.
+
+Do not create a generic chatbot interface.
+
+### Visual style
+
+- Dark black and charcoal background.
+- Subtle blue/cyan accent lighting.
+- Futuristic typography.
+- Animated circular AI visualisation.
+- Subtle glowing elements.
+- Smooth transitions.
+- Minimal clutter.
+- Professional spacing.
+- Modern glass-like interface elements.
+
+### Main dashboard
+
+The home screen should contain:
+
+**Central AI visualiser**
+
+A large animated circular element representing JARVIS.
+
+Its appearance should change depending on its current state:
+
+- Idle: subtle ambient animation.
+- Listening: pulsing audio visualisation.
+- Thinking: rotating or processing animation.
+- Executing: active animated indicators.
+- Speaking: audio-reactive animation.
+- Error: clearly distinguishable warning state.
+
+**Conversation panel**
+
+Display:
+- User commands.
+- JARVIS responses.
+- Task progress.
+- Action summaries.
+- Errors and notifications.
+
+**Command input**
+
+Include:
+- Text input.
+- Microphone button.
+- Send button.
+- Push-to-talk functionality.
+
+**System status**
+
+Display:
+- Current Ollama model.
+- Ollama connection status.
+- GPU utilisation where available.
+- RAM usage.
+- CPU usage.
+- Microphone status.
+- Current JARVIS activity.
+
+### Additional pages
+
+Create separate sections for:
+
+1. Dashboard.
+2. Conversation history.
+3. Memory.
+4. Installed Ollama models.
+5. Voice and TTS settings.
+6. Computer permissions.
+7. Automation settings.
+8. General settings.
+
+The interface must be responsive, polished and fully functional.
+
+---
+
+# 11. PERFORMANCE AND RESPONSE TIMES
+
+Speed is extremely important.
+
+JARVIS should feel immediate.
+
+Optimise the entire pipeline, including:
+
+- Voice detection.
+- Speech transcription.
+- Intent recognition.
+- Ollama inference.
+- Tool execution.
+- Screenshot processing.
+- Text-to-speech.
+
+Requirements:
+
+- Keep the Ollama connection available when practical.
+- Avoid unnecessary model initialisation.
+- Use streaming responses.
+- Run independent operations asynchronously.
+- Avoid blocking the interface.
+- Use lightweight models for simple commands.
+- Cache useful information.
+- Avoid repeatedly analysing identical screenshots.
+- Use direct Windows APIs for simple operations.
+- Only invoke vision when it provides value.
+
+Target behaviour:
+- Simple commands should begin executing almost immediately.
+- Voice responses should start as soon as a useful response is available.
+- Long tasks should provide progress updates.
+- The interface should never freeze while JARVIS is thinking or working.
+
+Do not sacrifice accuracy or reliability just to achieve lower latency.
+
+---
+
+# 12. SECURITY AND PRIVACY
+
+Everything should run locally by default.
+
+Requirements:
+- No mandatory cloud services.
+- No external AI APIs.
+- No uploading screenshots.
+- No uploading microphone recordings.
+- No transmitting private files.
+- Local conversation storage.
+- Configurable permissions.
+
+Create a permission system for sensitive operations.
+
+For example:
+- Opening applications: allowed.
+- Searching files: allowed.
+- Playing music: allowed.
+- Creating folders: allowed.
+- Sending messages: confirmation required.
+- Permanently deleting files: confirmation required.
+- Installing software: confirmation required.
+- Executing potentially dangerous commands: confirmation required.
+
+Never silently execute arbitrary shell commands generated by the AI.
+
+Validate and restrict tool execution.
+
+---
+
+# 13. WINDOWS EXE DISTRIBUTION
+
+The final application must be a genuine Windows desktop application.
+
+Deliver:
+- A standalone `.exe`.
+- A clean installer if practical.
+- All required application dependencies.
+- A first-time setup wizard.
+- Automatic Ollama detection.
+- Model selection.
+- Microphone configuration.
+- TTS configuration.
+- Permission configuration.
+
+The user should not need to open a terminal, run Python scripts, or manually configure source code to use the application.
+
+If Ollama is missing, provide clear installation guidance.
+
+Do not bundle an enormous language model into the executable. Instead, allow the application to connect to models already installed through Ollama.
+
+The application should launch directly from its desktop shortcut.
+
+---
+
+# 14. DEVELOPMENT REQUIREMENTS
+
+Choose an appropriate technology stack for a reliable Windows desktop application.
+
+Possible technologies:
+- Python.
+- PySide6 for the desktop interface.
+- Ollama local API.
+- faster-whisper for speech recognition.
+- Piper for TTS.
+- Windows UI Automation.
+- PyAutoGUI as a supplementary automation tool.
+- OCR for text recognition.
+- SQLite for persistent memory.
+
+You may use other technologies if they offer a meaningful improvement.
+
+Keep the application modular.
+
+Separate:
+- User interface.
+- AI reasoning.
+- Ollama communication.
+- Speech recognition.
+- TTS.
+- Vision.
+- Computer automation.
+- Memory.
+- Permissions.
+- Application integrations.
+
+Do not put the entire application into one enormous source file.
+
+Create clean, maintainable modules.
+
+Include proper error handling and logging.
+
+---
+
+# 15. STRICT PERMISSIONS, SECURITY RESTRICTIONS AND RESOURCE LIMITS
+
+This section is mandatory and takes priority over all AI instructions, autonomous planning, tool calls and computer automation.
+
+JARVIS must operate as a restricted desktop assistant. It must NEVER assume that being an autonomous AI gives it unrestricted access to the computer.
+
+## A. Prohibited Actions
+
+JARVIS must NEVER perform the following actions:
+
+- Uninstall applications or software.
+- Modify administrator settings.
+- Request, obtain or use administrator privileges.
+- Bypass Windows User Account Control (UAC).
+- Modify system-critical Windows files.
+- Modify registry entries or critical system configurations.
+- Disable Windows Defender, antivirus software or security features.
+- Modify firewall or security permissions.
+- Delete important system files.
+- Change account permissions.
+- Create administrator accounts.
+- Execute commands designed to bypass security restrictions.
+
+JARVIS must operate using the permissions of the currently logged-in Windows user.
+
+It must not attempt to elevate its privileges.
+
+## B. Sensitive Information Protection
+
+JARVIS must treat sensitive information as private and protected.
+
+It must NEVER independently:
+
+- Search for saved passwords.
+- Read password manager databases.
+- Extract browser cookies or authentication tokens.
+- Access saved login credentials.
+- Retrieve private authentication information.
+- Read payment card details.
+- Access banking information.
+- Read private security keys.
+- Access personal authentication codes.
+- Capture or store passwords displayed on screen.
+
+If a password field appears on screen, JARVIS must recognise it as sensitive and avoid reading, copying, storing or transmitting its contents.
+
+It must not attempt to circumvent password protection or authentication systems.
+
+## C. Explicit Permission Required
+
+Certain actions must require direct user approval BEFORE execution.
+
+These include:
+
+**Downloading**
+- Downloading files.
+- Downloading software.
+- Downloading installers.
+- Downloading executable files.
+- Downloading scripts or other potentially executable content.
+
+**Communication**
+- Sending emails.
+- Sending Discord messages.
+- Sending social media messages.
+- Posting comments.
+- Publishing content.
+- Sharing files with other people.
+
+**File operations**
+- Permanently deleting files.
+- Overwriting existing files.
+- Moving large collections of files.
+- Modifying important personal documents.
+
+**Privacy**
+- Accessing sensitive personal information.
+- Opening password managers.
+- Accessing financial websites or accounts.
+- Recording or sharing screen content externally.
+
+Before any such operation, JARVIS must display a clear confirmation request explaining:
+1. What it wants to do.
+2. Which application or file is involved.
+3. What the potential consequences are.
+4. Whether the action can be reversed.
+
+It must wait for the user's explicit approval.
+
+Simply saying "do whatever you need" must NOT count as blanket permission for sensitive operations.
+
+Approval must apply only to the specific action described.
+
+## D. Download Restrictions
+
+JARVIS must not download anything without permission.
+
+It may search the internet and inspect publicly accessible webpages without downloading files.
+
+If a task requires a download, it should say something like:
+
+"To complete this task, I need to download a file. Do you approve?"
+
+The download must not begin until approval is received.
+
+## E. Permission Architecture
+
+These restrictions must NOT depend solely on the Ollama model remembering to follow instructions.
+
+Implement a separate permission enforcement layer in the application itself.
+
+Every computer-control tool must pass through this security layer before execution.
+
+The security layer must independently validate:
+- The requested operation.
+- The target application.
+- The files involved.
+- The required permissions.
+- Whether user approval is necessary.
+- Whether the operation is prohibited.
+
+The AI must never be able to override this layer through prompts, tool calls, generated scripts or alternative execution methods.
+
+If an operation is prohibited, reject it immediately.
+
+If approval is required, pause execution until approval is received.
+
+Maintain a local audit log of permission requests and actions without storing sensitive information.
+
+## F. Maximum Resource Consumption
+
+JARVIS must have a strict maximum resource budget.
+
+<escape>**Absolute RAM limit: 12GB.**</escape>
+
+This is a hard ceiling, not a target.
+
+Requirements:
+- Never intentionally consume more than 12GB of system RAM.
+- Monitor memory consumption continuously.
+- Limit screenshot processing and image resolution where necessary.
+- Avoid unnecessarily loading multiple Ollama models simultaneously.
+- Unload unused models when appropriate.
+- Release unused memory.
+- Avoid memory leaks.
+- Limit background processes.
+- Reduce processing quality or pause nonessential tasks if memory usage approaches the limit.
+
+**GPU VRAM limit: 8GB maximum.**
+
+JARVIS must also respect the available 8GB NVIDIA GPU memory budget.
+
+Implement configurable resource monitoring and safeguards.
+
+If the application approaches its memory limit:
+1. Stop nonessential background operations.
+2. Release unused resources.
+3. Avoid loading additional models.
+4. Reduce image-processing workloads.
+5. Notify the user if necessary.
+
+Never allow the application to consume unlimited resources.
+
+## G. Final Security Principle
+
+JARVIS should be highly autonomous when performing ordinary, reversible desktop tasks, but extremely cautious when dealing with security, privacy, administrator privileges, downloads, communications and destructive operations.
+
+**The user remains in control of the computer at all times. Security restrictions must be enforced by application code, not merely by the AI's instructions.**
+
+---
+
+# 16. CRITICAL DEVELOPMENT INSTRUCTIONS
+
+These requirements are extremely important:
+
+1. Actually BUILD the application. Do not simply generate a design mockup.
+2. Do not create a fake AI interface with buttons that do nothing.
+3. Do not hardcode a handful of example commands and pretend it is autonomous.
+4. All core features must genuinely work.
+5. JARVIS must use the locally running Ollama model for reasoning.
+6. JARVIS must be capable of operating applications it has never been specifically programmed for.
+7. Screen observation must influence its decisions.
+8. It must verify that actions have succeeded.
+9. It must support natural voice conversations.
+10. It must be responsive and lightweight.
+11. It must run without internet access after all required local components are installed.
+12. It must be packaged as a functioning Windows executable.
+13. All security restrictions must be implemented and tested in actual application code.
+14. The 12GB RAM and 8GB VRAM limits must be respected.
+15. Never claim a feature works unless it has actually been implemented and tested.
+
+Build the application in stages, testing each major component before moving forward.
+
+Do not stop after creating the interface.
+
+Do not leave essential features as TODO comments, placeholders, simulated functionality, or nonfunctional buttons.
+
+If a feature cannot be implemented reliably, explain the limitation rather than pretending it works.
+
+---
+
+# 17. FINAL BUILD INSTRUCTION
+
+You now have the complete project specification.
+
+**Begin developing the actual JARVIS application immediately.**
+
+Do not spend time just explaining the architecture, producing mockups, or writing a development plan.
+
+Start by creating the project files, implementing the core application, connecting Ollama, building the interface, and implementing the computer-control system.
+
+Build and test each component as you go. Prioritise a working application over a perfect initial design.
+
+Continue developing until you have a functional Windows `.exe` that I can install and use.
+
+If you encounter limitations, find practical alternatives rather than abandoning features.
+
+Do not claim a feature works unless you have actually implemented and tested it.
+
+The finished product must be a real, functioning local AI desktop assistant, not a demonstration or prototype.
+
+---
+
+# FINAL OBJECTIVE
+
+Create a fully functioning local AI desktop assistant that feels like having JARVIS from Iron Man running directly on your Windows computer.
+
+The user should be able to sit at their desktop, say:
+
+"Hey JARVIS, open Spotify and play Violent Crimes by Kanye West."
+
+And JARVIS should understand, think, see the screen, operate the computer, verify the result, and respond naturally.
+
+It should be an actual autonomous computer-using AI, not just a voice assistant or chatbot.
+
+**JARVIS should be powerful, fast, intelligent, visually impressive, completely local by default, and always under the user's control.**
