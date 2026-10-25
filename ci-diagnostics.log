@@ -1,0 +1,100 @@
+=== python ===
+Python 3.11.9
+
+=== compileall ===
+Listing 'jarvis'...
+Listing 'jarvis\\core'...
+Listing 'jarvis\\integrations'...
+Listing 'jarvis\\llm'...
+Listing 'jarvis\\memory'...
+Listing 'jarvis\\platform'...
+Listing 'jarvis\\security'...
+Listing 'jarvis\\speech'...
+Listing 'jarvis\\tools'...
+Listing 'jarvis\\ui'...
+Listing 'jarvis\\ui\\pages'...
+Listing 'jarvis\\ui\\widgets'...
+Listing 'jarvis\\vision'...
+
+=== jarvis version ===
+JARVIS 1.0.0
+Python 3.11.9 on win32
+Data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS
+
+exit=0
+=== jarvis doctor --no-speech ===
+22:43:22 | INFO    | jarvis.app                   | JARVIS 1.0.0 starting (data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS)
+22:43:22 | WARNING | jarvis.platform              | JARVIS is running in Demo Mode (simulated desktop).
+22:43:22 | INFO    | jarvis.tools.registry        | Registered 58 tools (15 categories)
+22:43:22 | INFO    | jarvis.integrations.smtc     | SMTC unavailable: Windows.Media.Control projection is not installed (pip install winrt-Windows.Media.Control)
+
+Ollama is not reachable. Install it from https://ollama.com/download, pull a model, then re-run 'jarvis doctor'. Everything else above is unaffected.
+22:43:24 | INFO    | jarvis.core.runtime          | Shutting down JARVIS
+JARVIS 1.0.0 - data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS
+
+Ollama
+  installed: yes
+  reachable: NO at 127.0.0.1:11434
+  models installed: 0
+  main model: (none selected)
+  vision model: (none selected)
+  fast model: (none selected)
+
+Tools
+  registered: 58    available here: 58
+
+Screen and input
+OK  input            simulated          Demo Mode: actions are applied to a simulated desktop
+OK  screen_capture   simulated          Demo Mode: rendered in-process
+OK  window_control   simulated          Demo Mode
+OK  ui_elements      simulated          Demo Mode: full control tree
+OK  ocr              simulated          Demo Mode: reads the simulated UI text
+OK  applications     simulated          Demo Mode: 10 simulated apps + generic factory
+OK  audio            simulated          Demo Mode: system volume is simulated
+OK  simulation       simulated-desktop  Demo Mode is ACTIVE - no real desktop access
+
+Voice
+  recognition: on   synthesis: on   activation: push_to_talk
+  recognition: none (not available)
+  synthesis:   none (not available)
+
+Safety
+  mode: balanced   automation master switch: on
+  RAM ceiling: 12 GB   VRAM ceiling: 8 GB
+  current RAM: 0.03 GB   pressure: ok
+
+Simulation
+  demo/simulated mode: YES - actions are not real
+
+exit=3
+=== pip freeze (relevant) ===
+
+comtypes==1.4.17
+faster-whisper==1.2.1
+mss==10.2.0
+numpy==2.4.6
+pillow==13.0.0
+piper-tts==1.8.0
+psutil==7.2.2
+PyGetWindow==0.0.9
+pyinstaller==6.22.3
+pyinstaller-hooks-contrib==2026.9
+PySide6==6.8.3
+PySide6_Addons==6.8.3
+PySide6_Essentials==6.8.3
+pytesseract==0.3.13
+pywin32==312
+pywin32-ctypes==0.2.3
+RapidFuzz==3.14.6
+sounddevice==0.5.6
+soundfile==0.14.0
+uiautomation==2.0.29
+webrtcvad-wheels==2.0.14.post1
+winrt-runtime==4.0.3
+winrt-Windows.Foundation==4!10.0.28000.2705
+winrt-Windows.Foundation.Collections==4!10.0.28000.2705
+winrt-Windows.Graphics.Imaging==4!10.0.28000.2705
+winrt-Windows.Media.Ocr==4!10.0.28000.2705
+winrt-Windows.Storage.Streams==4!10.0.28000.2705
+
+
