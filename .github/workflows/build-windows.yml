@@ -71,8 +71,12 @@ jobs:
           # doctor exits 3 when Ollama is simply not installed, which is the
           # expected state on a build agent - anything else is a real failure.
           python -m jarvis.cli doctor --no-speech
-          if ($LASTEXITCODE -notin 0, 3) { throw "jarvis doctor failed with $LASTEXITCODE" }
+          $code = $LASTEXITCODE
           Remove-Item Env:JARVIS_DEMO
+          if ($code -notin 0, 3) { throw "jarvis doctor failed with $code" }
+          # The pwsh wrapper exits with the LAST native command's code, so end
+          # the step explicitly - exit 3 here would mark a healthy build failed.
+          exit 0
 
       - name: Run the test suite
         shell: pwsh
@@ -94,8 +98,10 @@ jobs:
           & $exe version
           if ($LASTEXITCODE -ne 0) { throw "frozen exe 'version' failed" }
           & $exe doctor --no-speech
-          if ($LASTEXITCODE -notin 0, 3) { throw "frozen exe doctor failed with $LASTEXITCODE" }
+          $code = $LASTEXITCODE
+          if ($code -notin 0, 3) { throw "frozen exe doctor failed with $code" }
           Write-Host "frozen exe runs"
+          exit 0
 
       - name: Build the Inno Setup installer
         shell: pwsh

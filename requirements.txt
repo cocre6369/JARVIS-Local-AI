@@ -44,6 +44,9 @@ piper-tts>=1.2.0           # high quality neural TTS, runs on CPU
 # Primary OCR backend on Windows 10/11 is the built-in
 # Windows.Media.Ocr engine (accessed through the `winrt` projections below),
 # which needs no extra model download. Tesseract is an optional fallback.
+# Native media-session control (Spotify play/pause/now-playing)
+winrt-Windows.Media.Control>=1.0.21033.1 ; sys_platform == 'win32'
+winrt-Windows.Foundation>=1.0.21033.1 ; sys_platform == 'win32'
 winrt-Windows.Media.Ocr>=1.0.21033.1 ; sys_platform == 'win32'
 winrt-Windows.Graphics.Imaging>=1.0.21033.1 ; sys_platform == 'win32'
 winrt-Windows.Storage.Streams>=1.0.21033.1 ; sys_platform == 'win32'

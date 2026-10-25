@@ -43,6 +43,8 @@ speech = [
     "piper-tts>=1.2.0",
 ]
 ocr = [
+    "winrt-Windows.Media.Control>=1.0.21033.1; sys_platform == 'win32'",
+    "winrt-Windows.Foundation>=1.0.21033.1; sys_platform == 'win32'",
     "winrt-Windows.Media.Ocr>=1.0.21033.1; sys_platform == 'win32'",
     "winrt-Windows.Graphics.Imaging>=1.0.21033.1; sys_platform == 'win32'",
     "winrt-Windows.Storage.Streams>=1.0.21033.1; sys_platform == 'win32'",
