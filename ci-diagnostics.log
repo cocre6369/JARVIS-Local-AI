@@ -23,12 +23,12 @@ Data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS
 
 exit=0
 === jarvis doctor --no-speech ===
-22:52:12 | INFO    | jarvis.app                   | JARVIS 1.0.0 starting (data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS)
-22:52:12 | WARNING | jarvis.platform              | JARVIS is running in Demo Mode (simulated desktop).
-22:52:12 | INFO    | jarvis.tools.registry        | Registered 58 tools (15 categories)
+22:57:47 | INFO    | jarvis.app                   | JARVIS 1.0.0 starting (data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS)
+22:57:48 | WARNING | jarvis.platform              | JARVIS is running in Demo Mode (simulated desktop).
+22:57:48 | INFO    | jarvis.tools.registry        | Registered 58 tools (15 categories)
 
 Ollama is not reachable. Install it from https://ollama.com/download, pull a model, then re-run 'jarvis doctor'. Everything else above is unaffected.
-22:52:14 | INFO    | jarvis.core.runtime          | Shutting down JARVIS
+22:57:50 | INFO    | jarvis.core.runtime          | Shutting down JARVIS
 JARVIS 1.0.0 - data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS
 
 Ollama
@@ -66,47 +66,7 @@ Simulation
   demo/simulated mode: YES - actions are not real
 
 exit=3
-=== pyinstaller (last 80 lines) ===
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\depend\analysis.py", line 539, in _safe_import_module
-    return super()._safe_import_module(module_basename, module_name, parent_package)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 1826, in _safe_import_module
-    self._process_imports(n)
-  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 2686, in _process_imports
-    target_modules = self._safe_import_hook(*import_info, **kwargs)
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\depend\analysis.py", line 477, in _safe_import_hook
-    ret_modules = super()._safe_import_hook(
-                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 2103, in _safe_import_hook
-    target_modules = self.import_hook(
-                     ^^^^^^^^^^^^^^^^^
-  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 1266, in import_hook
-    target_package, target_module_partname = self._find_head_package(
-                                             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 1445, in _find_head_package
-    target_package = self._safe_import_module(
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\depend\analysis.py", line 539, in _safe_import_module
-    return super()._safe_import_module(module_basename, module_name, parent_package)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 1826, in _safe_import_module
-    self._process_imports(n)
-  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 2686, in _process_imports
-    target_modules = self._safe_import_hook(*import_info, **kwargs)
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\depend\analysis.py", line 477, in _safe_import_hook
-    ret_modules = super()._safe_import_hook(
-                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 2103, in _safe_import_hook
-    target_modules = self.import_hook(
-                     ^^^^^^^^^^^^^^^^^
-  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 1266, in import_hook
-    target_package, target_module_partname = self._find_head_package(
-                                             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 1445, in _find_head_package
-    target_package = self._safe_import_module(
+=== pyinstaller (last 40 lines) ===
                      ^^^^^^^^^^^^^^^^^^^^^^^^^
   File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\depend\analysis.py", line 539, in _safe_import_module
     return super()._safe_import_module(module_basename, module_name, parent_package)
@@ -147,6 +107,48 @@ exit=3
   File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\depend\imphook.py", line 425, in _load_hook_module
     raise ImportErrorWhenRunningHook(self.hook_module_name, self.hook_filename)
 PyInstaller.exceptions.ImportErrorWhenRunningHook: ERROR: Failed to import module __PyInstaller_hooks_0_webrtcvad required by hook for module C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\_pyinstaller_hooks_contrib\stdhooks\hook-webrtcvad.py. Please check whether module __PyInstaller_hooks_0_webrtcvad actually exists and whether the hook is compatible with your version of C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\_pyinstaller_hooks_contrib\stdhooks\hook-webrtcvad.py: You might want to read more about hooks in the manual and provide a pull-request to improve PyInstaller.
+
+=== pyinstaller (first 40 lines) ===
+117 INFO: PyInstaller: 6.22.3, contrib hooks: 2026.9
+117 INFO: Python: 3.11.9
+129 INFO: Platform: Windows-10-10.0.26100-SP0
+129 INFO: Python environment: C:\hostedtoolcache\windows\Python\3.11.9\x64
+133 INFO: Module search paths (PYTHONPATH):
+['D:\\a\\JARVIS-Local-AI\\JARVIS-Local-AI',
+ 'D:\\a\\JARVIS-Local-AI\\JARVIS-Local-AI',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\python311.zip',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\DLLs',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\win32',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\win32\\lib',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\pythonwin',
+ 'D:\\a\\JARVIS-Local-AI\\JARVIS-Local-AI']
+462 INFO: checking Analysis
+462 INFO: Building Analysis because Analysis-00.toc is non existent
+462 INFO: Looking for Python shared library...
+462 INFO: Using Python shared library: C:\hostedtoolcache\windows\Python\3.11.9\x64\python311.dll
+462 INFO: Running Analysis Analysis-00.toc
+462 INFO: Target bytecode optimization level: 0
+463 INFO: Initializing module dependency graph...
+464 INFO: Initializing module graph hook caches...
+495 INFO: Analyzing modules for base_library.zip ...
+1418 INFO: Processing standard module hook 'hook-heapq.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+1531 INFO: Processing standard module hook 'hook-encodings.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+2975 INFO: Processing standard module hook 'hook-math.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+3075 INFO: Processing standard module hook 'hook-pickle.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+4646 INFO: Caching module dependency graph...
+4688 INFO: Analyzing D:\a\JARVIS-Local-AI\JARVIS-Local-AI\jarvis\__main__.py
+4690 INFO: Analyzing hidden import 'jarvis'
+4692 INFO: Analyzing hidden import 'jarvis.app'
+5285 INFO: Processing standard module hook 'hook-platform.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+5331 INFO: Processing standard module hook 'hook-psutil.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+5374 INFO: Processing standard module hook 'hook-_ctypes.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+5746 INFO: Processing standard module hook 'hook-sqlite3.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+6180 INFO: Processing standard module hook 'hook-xml.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+6200 INFO: Processing standard module hook 'hook-xml.etree.cElementTree.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+6369 INFO: Processing standard module hook 'hook-difflib.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
 
 === pip freeze (relevant) ===
 
