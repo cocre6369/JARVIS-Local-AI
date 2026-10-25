@@ -140,15 +140,18 @@ jobs:
           $lines += "=== jarvis doctor --no-speech ==="
           $lines += (python -m jarvis.cli doctor --no-speech 2>&1 | Out-String)
           $lines += ("exit=" + $LASTEXITCODE)
-          $lines += "=== pyinstaller (last 80 lines) ==="
-          $lines += (python -m PyInstaller packaging/jarvis.spec --noconfirm 2>&1 | Select-Object -Last 80 | Out-String)
+          python -m PyInstaller packaging/jarvis.spec --noconfirm *> ci-pyinstaller.log
+          $lines += "=== pyinstaller (last 40 lines) ==="
+          $lines += (Get-Content ci-pyinstaller.log -Tail 40 | Out-String)
+          $lines += "=== pyinstaller (first 40 lines) ==="
+          $lines += (Get-Content ci-pyinstaller.log -Head 40 | Out-String)
           $lines += "=== pip freeze (relevant) ==="
           $lines += (python -m pip freeze 2>&1 | Select-String -Pattern "PySide6|psutil|numpy|Pillow|mss|pywin32|uiautomation|comtypes|pygetwindow|faster|sounddevice|soundfile|webrtcvad|piper|winrt|pytesseract|rapidfuzz|pyinstaller" | Out-String)
           Remove-Item Env:JARVIS_DEMO -ErrorAction SilentlyContinue
           $lines -join "`n" | Out-File -FilePath ci-diagnostics.log -Encoding utf8
           git config user.name "CI Diagnostics"
           git config user.email "ci@users.noreply.github.com"
-          git add ci-diagnostics.log
+          git add ci-diagnostics.log ci-pyinstaller.log
           git commit -m "ci-diag: windows build failure diagnostics [skip ci]"
           git push origin HEAD:${{ github.ref_name }}
 

@@ -23,6 +23,11 @@ import os
 import sys
 from pathlib import Path
 
+# PyInstaller's modulegraph walks the import graph depth-first; with WinRT
+# projections, PySide6 and numpy in the graph the default 1000-frame limit is
+# not enough and analysis dies with RecursionError (or a blown C stack).
+sys.setrecursionlimit(max(10000, sys.getrecursionlimit()))
+
 HERE = Path(SPECPATH).resolve()
 ROOT = HERE.parent
 ASSETS = HERE / "assets"
