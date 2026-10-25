@@ -27,6 +27,9 @@ jobs:
     name: Freeze JARVIS for Windows
     runs-on: windows-latest
     timeout-minutes: 90
+    # The failure-diagnostics step below commits a log back to this branch;
+    # that commit must not start another build (it would loop).
+    if: ${{ !contains(github.event.head_commit.message, 'ci-diag') }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
@@ -48,13 +51,23 @@ jobs:
         shell: pwsh
         run: python packaging/make_icon.py
 
-      - name: Verify the code compiles and the engine boots
+      - name: Verify the code compiles
         shell: pwsh
         run: |
           python -m compileall -q jarvis
+          if ($LASTEXITCODE -ne 0) { throw "compileall failed" }
+
+      - name: Verify jarvis version runs headless
+        shell: pwsh
+        run: |
           $env:JARVIS_DEMO = "1"
           python -m jarvis.cli version
-          if ($LASTEXITCODE -ne 0) { throw "jarvis version failed" }
+          if ($LASTEXITCODE -ne 0) { throw "jarvis version failed with $LASTEXITCODE" }
+
+      - name: Verify the engine boots (doctor)
+        shell: pwsh
+        run: |
+          $env:JARVIS_DEMO = "1"
           # doctor exits 3 when Ollama is simply not installed, which is the
           # expected state on a build agent - anything else is a real failure.
           python -m jarvis.cli doctor --no-speech
@@ -104,6 +117,32 @@ jobs:
         shell: pwsh
         run: |
           Compress-Archive -Path dist\JARVIS -DestinationPath "dist\JARVIS-portable-${{ env.app_version }}.zip" -CompressionLevel Optimal
+
+      - name: Capture failure diagnostics
+        if: failure()
+        shell: pwsh
+        run: |
+          $lines = @()
+          $lines += "=== python ==="
+          $lines += (python --version 2>&1 | Out-String)
+          $lines += "=== compileall ==="
+          $lines += (python -m compileall jarvis 2>&1 | Out-String)
+          $env:JARVIS_DEMO = "1"
+          $lines += "=== jarvis version ==="
+          $lines += (python -m jarvis.cli version 2>&1 | Out-String)
+          $lines += ("exit=" + $LASTEXITCODE)
+          $lines += "=== jarvis doctor --no-speech ==="
+          $lines += (python -m jarvis.cli doctor --no-speech 2>&1 | Out-String)
+          $lines += ("exit=" + $LASTEXITCODE)
+          $lines += "=== pip freeze (relevant) ==="
+          $lines += (python -m pip freeze 2>&1 | Select-String -Pattern "PySide6|psutil|numpy|Pillow|mss|pywin32|uiautomation|comtypes|pygetwindow|faster|sounddevice|soundfile|webrtcvad|piper|winrt|pytesseract|rapidfuzz|pyinstaller" | Out-String)
+          Remove-Item Env:JARVIS_DEMO -ErrorAction SilentlyContinue
+          $lines -join "`n" | Out-File -FilePath ci-diagnostics.log -Encoding utf8
+          git config user.name "CI Diagnostics"
+          git config user.email "ci@users.noreply.github.com"
+          git add ci-diagnostics.log
+          git commit -m "ci-diag: windows build failure diagnostics [skip ci]"
+          git push origin HEAD:${{ github.ref_name }}
 
       - name: Upload artefacts
         uses: actions/upload-artifact@v4
