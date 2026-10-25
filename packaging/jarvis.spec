@@ -23,8 +23,6 @@ import os
 import sys
 from pathlib import Path
 
-block_cipher = None
-
 HERE = Path(SPECPATH).resolve()
 ROOT = HERE.parent
 ASSETS = HERE / "assets"
@@ -78,9 +76,6 @@ a = Analysis(
         "tkinter", "_tkinter", "matplotlib", "scipy", "pandas", "IPython",
         "notebook", "pytest", "torch", "tensorflow", "onnxruntime",
     ],
-    win_no_prefer_redirects=False,
-    win_private_assemblies=False,
-    cipher=block_cipher,
     noarchive=False,
 )
 
@@ -91,7 +86,9 @@ for module in ("jarvis",):
     a.hiddenimports += [name for name in _hooks.collect_submodules(module)
                         if name not in a.hiddenimports]
 
-pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+# PyInstaller 6: PYZ takes only the analysed modules (bytecode encryption
+# and the old zipped_data/cipher arguments were removed).
+pyz = PYZ(a.pure)
 
 exe = EXE(
     pyz,
@@ -110,7 +107,6 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon=str(ICON) if ICON.exists() else None,
-    version=None,
 )
 
 coll = COLLECT(

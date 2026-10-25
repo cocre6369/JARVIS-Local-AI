@@ -140,6 +140,8 @@ jobs:
           $lines += "=== jarvis doctor --no-speech ==="
           $lines += (python -m jarvis.cli doctor --no-speech 2>&1 | Out-String)
           $lines += ("exit=" + $LASTEXITCODE)
+          $lines += "=== pyinstaller (last 80 lines) ==="
+          $lines += (python -m PyInstaller packaging/jarvis.spec --noconfirm 2>&1 | Select-Object -Last 80 | Out-String)
           $lines += "=== pip freeze (relevant) ==="
           $lines += (python -m pip freeze 2>&1 | Select-String -Pattern "PySide6|psutil|numpy|Pillow|mss|pywin32|uiautomation|comtypes|pygetwindow|faster|sounddevice|soundfile|webrtcvad|piper|winrt|pytesseract|rapidfuzz|pyinstaller" | Out-String)
           Remove-Item Env:JARVIS_DEMO -ErrorAction SilentlyContinue
