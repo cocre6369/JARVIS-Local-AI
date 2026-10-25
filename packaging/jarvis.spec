@@ -73,13 +73,13 @@ a = Analysis(
     binaries=[],
     datas=[],
     hiddenimports=HIDDEN_IMPORTS,
-    hookspath=[],
+    hookspath=[str(ROOT / "packaging" / "hooks")],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[
         # never shipped: JARVIS has no cloud AI and no notebooks
         "tkinter", "_tkinter", "matplotlib", "scipy", "pandas", "IPython",
-        "notebook", "pytest", "torch", "tensorflow", "onnxruntime",
+        "notebook", "pytest", "torch", "tensorflow",
     ],
     noarchive=False,
 )
