@@ -54,7 +54,11 @@ jobs:
           python -m compileall -q jarvis
           $env:JARVIS_DEMO = "1"
           python -m jarvis.cli version
+          if ($LASTEXITCODE -ne 0) { throw "jarvis version failed" }
+          # doctor exits 3 when Ollama is simply not installed, which is the
+          # expected state on a build agent - anything else is a real failure.
           python -m jarvis.cli doctor --no-speech
+          if ($LASTEXITCODE -notin 0, 3) { throw "jarvis doctor failed with $LASTEXITCODE" }
           Remove-Item Env:JARVIS_DEMO
 
       - name: Run the test suite
@@ -77,6 +81,7 @@ jobs:
           & $exe version
           if ($LASTEXITCODE -ne 0) { throw "frozen exe 'version' failed" }
           & $exe doctor --no-speech
+          if ($LASTEXITCODE -notin 0, 3) { throw "frozen exe doctor failed with $LASTEXITCODE" }
           Write-Host "frozen exe runs"
 
       - name: Build the Inno Setup installer
@@ -85,6 +90,11 @@ jobs:
           $version = python -c "import jarvis; print(jarvis.__version__)"
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $iscc)) { $iscc = "${env:ProgramFiles}\Inno Setup 6\ISCC.exe" }
+          if (-not (Test-Path $iscc)) {
+            # Not preinstalled on this image: fetch it the same way a user would.
+            choco install innosetup --yes --no-progress | Out-Null
+            $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          }
           if (-not (Test-Path $iscc)) { throw "Inno Setup not found on runner" }
           & $iscc /DAppVersion=$version /Odist /F"JARVIS-Setup-$version" packaging/installer.iss
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed" }
