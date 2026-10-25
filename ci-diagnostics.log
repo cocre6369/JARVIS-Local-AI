@@ -23,12 +23,12 @@ Data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS
 
 exit=0
 === jarvis doctor --no-speech ===
-22:47:45 | INFO    | jarvis.app                   | JARVIS 1.0.0 starting (data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS)
-22:47:45 | WARNING | jarvis.platform              | JARVIS is running in Demo Mode (simulated desktop).
-22:47:45 | INFO    | jarvis.tools.registry        | Registered 58 tools (15 categories)
+22:52:12 | INFO    | jarvis.app                   | JARVIS 1.0.0 starting (data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS)
+22:52:12 | WARNING | jarvis.platform              | JARVIS is running in Demo Mode (simulated desktop).
+22:52:12 | INFO    | jarvis.tools.registry        | Registered 58 tools (15 categories)
 
 Ollama is not reachable. Install it from https://ollama.com/download, pull a model, then re-run 'jarvis doctor'. Everything else above is unaffected.
-22:47:47 | INFO    | jarvis.core.runtime          | Shutting down JARVIS
+22:52:14 | INFO    | jarvis.core.runtime          | Shutting down JARVIS
 JARVIS 1.0.0 - data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS
 
 Ollama
@@ -66,6 +66,88 @@ Simulation
   demo/simulated mode: YES - actions are not real
 
 exit=3
+=== pyinstaller (last 80 lines) ===
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\depend\analysis.py", line 539, in _safe_import_module
+    return super()._safe_import_module(module_basename, module_name, parent_package)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 1826, in _safe_import_module
+    self._process_imports(n)
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 2686, in _process_imports
+    target_modules = self._safe_import_hook(*import_info, **kwargs)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\depend\analysis.py", line 477, in _safe_import_hook
+    ret_modules = super()._safe_import_hook(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 2103, in _safe_import_hook
+    target_modules = self.import_hook(
+                     ^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 1266, in import_hook
+    target_package, target_module_partname = self._find_head_package(
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 1445, in _find_head_package
+    target_package = self._safe_import_module(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\depend\analysis.py", line 539, in _safe_import_module
+    return super()._safe_import_module(module_basename, module_name, parent_package)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 1826, in _safe_import_module
+    self._process_imports(n)
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 2686, in _process_imports
+    target_modules = self._safe_import_hook(*import_info, **kwargs)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\depend\analysis.py", line 477, in _safe_import_hook
+    ret_modules = super()._safe_import_hook(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 2103, in _safe_import_hook
+    target_modules = self.import_hook(
+                     ^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 1266, in import_hook
+    target_package, target_module_partname = self._find_head_package(
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 1445, in _find_head_package
+    target_package = self._safe_import_module(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\depend\analysis.py", line 539, in _safe_import_module
+    return super()._safe_import_module(module_basename, module_name, parent_package)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 1826, in _safe_import_module
+    self._process_imports(n)
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 2686, in _process_imports
+    target_modules = self._safe_import_hook(*import_info, **kwargs)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\depend\analysis.py", line 477, in _safe_import_hook
+    ret_modules = super()._safe_import_hook(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 2103, in _safe_import_hook
+    target_modules = self.import_hook(
+                     ^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 1266, in import_hook
+    target_package, target_module_partname = self._find_head_package(
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 1445, in _find_head_package
+    target_package = self._safe_import_module(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\depend\analysis.py", line 539, in _safe_import_module
+    return super()._safe_import_module(module_basename, module_name, parent_package)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 1826, in _safe_import_module
+    self._process_imports(n)
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\lib\modulegraph\modulegraph.py", line 2686, in _process_imports
+    target_modules = self._safe_import_hook(*import_info, **kwargs)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\depend\analysis.py", line 385, in _safe_import_hook
+    excluded_imports = self._find_all_excluded_imports(source_module.identifier)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\depend\analysis.py", line 373, in _find_all_excluded_imports
+    excluded_imports.update(module_hook.excludedimports)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\depend\imphook.py", line 343, in __getattr__
+    self._load_hook_module()
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\depend\imphook.py", line 425, in _load_hook_module
+    raise ImportErrorWhenRunningHook(self.hook_module_name, self.hook_filename)
+PyInstaller.exceptions.ImportErrorWhenRunningHook: ERROR: Failed to import module __PyInstaller_hooks_0_webrtcvad required by hook for module C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\_pyinstaller_hooks_contrib\stdhooks\hook-webrtcvad.py. Please check whether module __PyInstaller_hooks_0_webrtcvad actually exists and whether the hook is compatible with your version of C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\_pyinstaller_hooks_contrib\stdhooks\hook-webrtcvad.py: You might want to read more about hooks in the manual and provide a pull-request to improve PyInstaller.
+
 === pip freeze (relevant) ===
 
 comtypes==1.4.17
