@@ -23,13 +23,12 @@ Data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS
 
 exit=0
 === jarvis doctor --no-speech ===
-22:43:22 | INFO    | jarvis.app                   | JARVIS 1.0.0 starting (data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS)
-22:43:22 | WARNING | jarvis.platform              | JARVIS is running in Demo Mode (simulated desktop).
-22:43:22 | INFO    | jarvis.tools.registry        | Registered 58 tools (15 categories)
-22:43:22 | INFO    | jarvis.integrations.smtc     | SMTC unavailable: Windows.Media.Control projection is not installed (pip install winrt-Windows.Media.Control)
+22:47:45 | INFO    | jarvis.app                   | JARVIS 1.0.0 starting (data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS)
+22:47:45 | WARNING | jarvis.platform              | JARVIS is running in Demo Mode (simulated desktop).
+22:47:45 | INFO    | jarvis.tools.registry        | Registered 58 tools (15 categories)
 
 Ollama is not reachable. Install it from https://ollama.com/download, pull a model, then re-run 'jarvis doctor'. Everything else above is unaffected.
-22:43:24 | INFO    | jarvis.core.runtime          | Shutting down JARVIS
+22:47:47 | INFO    | jarvis.core.runtime          | Shutting down JARVIS
 JARVIS 1.0.0 - data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS
 
 Ollama
@@ -94,6 +93,7 @@ winrt-runtime==4.0.3
 winrt-Windows.Foundation==4!10.0.28000.2705
 winrt-Windows.Foundation.Collections==4!10.0.28000.2705
 winrt-Windows.Graphics.Imaging==4!10.0.28000.2705
+winrt-Windows.Media.Control==4!10.0.28000.2705
 winrt-Windows.Media.Ocr==4!10.0.28000.2705
 winrt-Windows.Storage.Streams==4!10.0.28000.2705
 
