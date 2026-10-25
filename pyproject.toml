@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jarvis-local-ai"
+version = "1.0.0"
+description = "JARVIS - a private, fully local Windows AI assistant that can see and operate your computer"
+readme = "packaging/README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary - personal use" }
+authors = [{ name = "JARVIS Local" }]
+keywords = ["assistant", "local-ai", "ollama", "automation", "privacy"]
+classifiers = [
+    "Environment :: Win32 (MS Windows)",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Desktop Environment",
+]
+
+# Only what the application genuinely cannot start without.  Everything else is
+# optional and imported lazily behind a capability probe, so a machine without
+# a microphone or an OCR engine still gets a working JARVIS.
+dependencies = [
+    "PySide6>=6.6,<6.9",
+    "psutil>=5.9",
+]
+
+[project.optional-dependencies]
+vision = ["Pillow>=10.0", "mss>=9.0.1", "numpy>=1.24"]
+automation = [
+    "pyautogui>=0.9.54; sys_platform == 'win32'",
+    "pywin32>=306; sys_platform == 'win32'",
+    "uiautomation>=2.0.18; sys_platform == 'win32'",
+    "comtypes>=1.2.0; sys_platform == 'win32'",
+    "pygetwindow>=0.0.9; sys_platform == 'win32'",
+]
+speech = [
+    "faster-whisper>=1.0.0",
+    "sounddevice>=0.4.6",
+    "soundfile>=0.12.1",
+    "webrtcvad-wheels>=2.0.11",
+    "piper-tts>=1.2.0",
+]
+ocr = [
+    "winrt-Windows.Media.Ocr>=1.0.21033.1; sys_platform == 'win32'",
+    "winrt-Windows.Graphics.Imaging>=1.0.21033.1; sys_platform == 'win32'",
+    "winrt-Windows.Storage.Streams>=1.0.21033.1; sys_platform == 'win32'",
+    "winrt-runtime>=1.0.21033.1; sys_platform == 'win32'",
+    "pytesseract>=0.3.10",
+]
+matching = ["rapidfuzz>=3.5"]
+dev = ["pytest>=7.4", "pytest-timeout>=2.2"]
+all = [
+    "jarvis-local-ai[vision,automation,speech,ocr,matching]",
+]
+
+[project.scripts]
+jarvis = "jarvis.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/cocre6369/JARVIS-Local-AI"
+
+[tool.setuptools.packages.find]
+include = ["jarvis*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --timeout=300"
+filterwarnings = ["ignore::DeprecationWarning"]

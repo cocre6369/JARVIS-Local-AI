@@ -1,0 +1,117 @@
+name: build-windows
+
+# Builds the downloadable Windows executable and installer.
+#
+# The .exe cannot be cross-compiled: PyInstaller must run on Windows, so this
+# workflow is the supported way to produce the artefact a user downloads.
+# It runs on every tag (v*), on demand from the Actions tab, and on pushes to
+# the main development branch so a broken freeze is caught immediately.
+
+on:
+  push:
+    tags: ["v*"]
+    branches: ["main", "arena/*"]
+    paths-ignore:
+      - "**.md"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write          # needed only to attach the installer to a release
+
+concurrency:
+  group: build-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  freeze:
+    name: Freeze JARVIS for Windows
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install -r requirements.txt
+          python -m pip install "pyinstaller>=6.3,<7"
+
+      - name: Generate the icon
+        shell: pwsh
+        run: python packaging/make_icon.py
+
+      - name: Verify the code compiles and the engine boots
+        shell: pwsh
+        run: |
+          python -m compileall -q jarvis
+          $env:JARVIS_DEMO = "1"
+          python -m jarvis.cli version
+          python -m jarvis.cli doctor --no-speech
+          Remove-Item Env:JARVIS_DEMO
+
+      - name: Run the test suite
+        shell: pwsh
+        run: |
+          python -m pip install -r requirements-dev.txt
+          python -m pytest -q
+
+      - name: Freeze with PyInstaller
+        shell: pwsh
+        run: python -m PyInstaller packaging/jarvis.spec --noconfirm --clean
+
+      - name: Smoke-test the frozen executable
+        shell: pwsh
+        run: |
+          $exe = "dist\JARVIS\JARVIS.exe"
+          if (-not (Test-Path $exe)) { throw "dist\JARVIS\JARVIS.exe is missing" }
+          $env:JARVIS_DEMO = "1"
+          $env:JARVIS_DATA_DIR = "$env:TEMP\jarvis-ci-data"
+          & $exe version
+          if ($LASTEXITCODE -ne 0) { throw "frozen exe 'version' failed" }
+          & $exe doctor --no-speech
+          Write-Host "frozen exe runs"
+
+      - name: Build the Inno Setup installer
+        shell: pwsh
+        run: |
+          $version = python -c "import jarvis; print(jarvis.__version__)"
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { $iscc = "${env:ProgramFiles}\Inno Setup 6\ISCC.exe" }
+          if (-not (Test-Path $iscc)) { throw "Inno Setup not found on runner" }
+          & $iscc /DAppVersion=$version /Odist /F"JARVIS-Setup-$version" packaging/installer.iss
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed" }
+          "app_version=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Package a portable zip
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist\JARVIS -DestinationPath "dist\JARVIS-portable-${{ env.app_version }}.zip" -CompressionLevel Optimal
+
+      - name: Upload artefacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-windows
+          path: |
+            dist/JARVIS-Setup-*.exe
+            dist/JARVIS-portable-*.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish a GitHub release (tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/JARVIS-Setup-*.exe
+            dist/JARVIS-portable-*.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: false
