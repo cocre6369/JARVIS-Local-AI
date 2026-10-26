@@ -8,7 +8,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QTextCursor
 from PySide6.QtWidgets import (
     QHeaderView,
-    QTextEdit,
+    QTextBrowser,
     QTreeWidget,
     QTreeWidgetItem,
     QVBoxLayout,
@@ -30,8 +30,13 @@ from ..theme import Theme
 MAX_FRAGMENTS = 140
 
 
-class ConversationView(QTextEdit):
-    """Read-only conversation feed with streaming support."""
+class ConversationView(QTextBrowser):
+    """Read-only conversation feed with streaming support.
+
+    QTextBrowser (a QTextEdit subclass) is the right base for a read-only
+    rich-text feed, and the only one that has ``setOpenExternalLinks`` -
+    calling it on a plain QTextEdit crashed the main window at startup.
+    """
 
     def __init__(self, theme: Theme, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
