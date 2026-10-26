@@ -111,9 +111,13 @@ class GeneralPage(Page):
         self.start_min = QPushButton("Start minimised to the tray")
         self.start_min.setCheckable(True)
         self.start_min.setChecked(bool(u.start_minimised))
-        self.close_tray = QPushButton("Keep running in the tray when I close the window")
+        self.close_tray = QPushButton("Keep running in the tray when I close the window (always on)")
         self.close_tray.setCheckable(True)
-        self.close_tray.setChecked(bool(u.close_to_tray))
+        self.close_tray.setChecked(True)
+        self.close_tray.setEnabled(False)
+        self.orb_box = QPushButton("Floating JARVIS orb: state colours + mini chat (bottom-right)")
+        self.orb_box.setCheckable(True)
+        self.orb_box.setChecked(bool(getattr(u, "show_desktop_orb", True)))
         self.opacity = QDoubleSpinBox()
         self.opacity.setRange(0.5, 1.0)
         self.opacity.setSingleStep(0.05)
@@ -129,6 +133,7 @@ class GeneralPage(Page):
         self.metrics_ms.setValue(int(u.metrics_refresh_ms))
         sform.addRow("", self.start_min)
         sform.addRow("", self.close_tray)
+        sform.addRow("", self.orb_box)
         sform.addRow("Window opacity", self.opacity)
         sform.addRow("", self.metrics_box)
         sform.addRow("Metrics refresh", self.metrics_ms)
@@ -226,7 +231,8 @@ class GeneralPage(Page):
         self.core_box.setChecked(bool(u.core_visualiser))
         self.trace_box.setChecked(bool(u.show_tool_trace))
         self.start_min.setChecked(bool(u.start_minimised))
-        self.close_tray.setChecked(bool(u.close_to_tray))
+        self.close_tray.setChecked(True)
+        self.orb_box.setChecked(bool(getattr(u, "show_desktop_orb", True)))
         self.opacity.setValue(float(u.window_opacity))
         self.metrics_box.setChecked(bool(u.show_status_metrics))
         self.metrics_ms.setValue(int(u.metrics_refresh_ms))
@@ -256,7 +262,8 @@ class GeneralPage(Page):
                 "core_visualiser": bool(self.core_box.isChecked()),
                 "show_tool_trace": bool(self.trace_box.isChecked()),
                 "start_minimised": bool(self.start_min.isChecked()),
-                "close_to_tray": bool(self.close_tray.isChecked()),
+                "close_to_tray": True,
+                "show_desktop_orb": bool(self.orb_box.isChecked()),
                 "window_opacity": float(self.opacity.value()),
                 "show_status_metrics": bool(self.metrics_box.isChecked()),
                 "metrics_refresh_ms": int(self.metrics_ms.value()),

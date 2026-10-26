@@ -279,7 +279,13 @@ class UISettings:
     show_status_metrics: bool = True
     metrics_refresh_ms: int = 1000
     start_minimised: bool = False
-    close_to_tray: bool = False
+    #: Closing the window minimises JARVIS to the tray instead of quitting.
+    #: LOCKED ON: the assistant must keep working (tasks, wake word, the
+    #: floating orb) when the main window is closed.
+    close_to_tray: bool = True
+    #: Floating always-on-top orb (bottom-right): state colours + mini chat,
+    #: visible even when the main window is minimised or closed to the tray.
+    show_desktop_orb: bool = True
     window_opacity: float = 1.0
     conversation_font_size: int = 12
     show_tool_trace: bool = True
@@ -372,6 +378,7 @@ class Settings:
         sec.require_approval_for_shell_commands = True
         # Vision / memory locks.
         self.vision.mask_password_fields = True
+        self.ui.close_to_tray = True      # LOCKED - closing must never kill a task
         self.vision.local_only = True
         self.memory.redact_secrets = True
         self.general.telemetry_enabled = False
