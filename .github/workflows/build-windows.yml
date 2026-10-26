@@ -97,8 +97,8 @@ jobs:
           $env:QT_QPA_PLATFORM = "offscreen"
           $env:JARVIS_DEMO = "1"
           $env:JARVIS_DATA_DIR = "$env:TEMP\jarvis-ci-ui"
-          python scripts/_ci_ui_check.py
-          if ($LASTEXITCODE -ne 0) { throw "offscreen UI build check failed" }
+          python scripts/_ci_ui_check.py *>&1 | Tee-Object -FilePath ci-ui.log | Write-Host
+          if ($LASTEXITCODE -ne 0) { throw "offscreen UI build check failed (see ci-ui.log)" }
           exit 0
 
       - name: Run the test suite
@@ -207,7 +207,7 @@ jobs:
           $lines += (python -m jarvis.cli doctor --no-speech 2>&1 | Out-String)
           $lines += ("exit=" + $LASTEXITCODE)
           python -m PyInstaller packaging/jarvis.spec --noconfirm *> ci-pyinstaller.log
-          foreach ($f in "smoke-version.out.log","smoke-version.err.log","smoke-doctor.out.log","smoke-doctor.err.log","choco-innosetup.log","iscc.log") {
+          foreach ($f in "ci-ui.log","smoke-version.out.log","smoke-version.err.log","smoke-doctor.out.log","smoke-doctor.err.log","choco-innosetup.log","iscc.log") {
             if (Test-Path $f) { $lines += "=== $f ==="; $lines += (Get-Content $f -Tail 60 | Out-String) }
           }
           $lines += "=== pyinstaller (last 40 lines) ==="
