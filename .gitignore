@@ -28,3 +28,11 @@ jarvis-data/
 *.db
 *.db-wal
 *.db-shm
+
+# CI self-diagnostics (committed by the workflow on failure, then cleaned up)
+ci-diagnostics.log
+ci-pyinstaller.log
+flagprobe.iss
+smoke-*.log
+choco-innosetup.log
+iscc.log
