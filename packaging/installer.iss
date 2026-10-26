@@ -14,6 +14,9 @@
 #ifndef AppVersion
   #define AppVersion "1.0.0"
 #endif
+#ifndef RunFlagsLine
+  #define RunFlagsLine "; Flags: nowait postcreate skipifsilent"
+#endif
 
 #define AppName "JARVIS"
 #define AppPublisher "JARVIS Local"
@@ -66,7 +69,7 @@ Name: "{group}\Uninstall {#AppName}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExeName}"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(AppName, '&', '&&')}}"; Flags: nowait postcreate skipifsilent; Tasks: launchafter
+Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(AppName, '&', '&&')}}"; Tasks: launchafter{#RunFlagsLine}
 
 [UninstallDelete]
 ; Scratch data (screenshots, temp files) is disposable; settings and memories are

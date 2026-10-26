@@ -139,7 +139,24 @@ jobs:
           if (-not $iscc) { $iscc = (Get-Command iscc -ErrorAction SilentlyContinue).Source }
           if (-not $iscc) { throw "Inno Setup not found on runner (see choco-innosetup.log)" }
           Write-Host "Using ISCC: $iscc"
-          & $iscc "/DAppVersion=$version" /Odist "/FJARVIS-Setup-$version" packaging\installer.iss *>&1 |
+          # [Run] flags changed between Inno releases; probe which set this
+          # compiler accepts (each probe is a sub-second /Q compile) and pass
+          # the winner to installer.iss via /DRunFlags.
+          $flagsets = @("nowait postcreate skipifsilent", "nowait skipifsilent", "postcreate skipifsilent", "skipifsilent", "")
+          $probeHeader = "[Setup]\nAppName=flagprobe\nAppVersion=1.0\nDefaultDirName={tmp}\nOutputDir={tmp}\nDisableProgramGroupPage=yes\n[Run]\n".Replace("\n", [char]13 + [char]10)
+          $runFlags = $null
+          foreach ($fs in $flagsets) {
+            $runLine = 'Filename: "{sys}\notepad.exe"'
+            if ($fs) { $runLine += "; Flags: $fs" }
+            Set-Content -Path flagprobe.iss -Value ($probeHeader + $runLine)
+            & $iscc /Q flagprobe.iss *> $null
+            if ($LASTEXITCODE -eq 0) { $runFlags = $fs; break }
+          }
+          if ($null -eq $runFlags) { throw "no [Run] flag set compiles on this Inno version" }
+          $runFlagsLine = ""
+          if ($runFlags) { $runFlagsLine = "; Flags: $runFlags" }
+          Write-Host "Using [Run] flags: '$runFlags'"
+          & $iscc "/DAppVersion=$version" "/DRunFlagsLine=$runFlagsLine" /Odist "/FJARVIS-Setup-$version" packaging\installer.iss *>&1 |
             Tee-Object -FilePath iscc.log | Select-Object -Last 40 | Write-Host
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed (see iscc.log)" }
           "app_version=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
