@@ -23,12 +23,12 @@ Data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS
 
 exit=0
 === jarvis doctor --no-speech ===
-00:13:35 | INFO    | jarvis.app                   | JARVIS 1.0.0 starting (data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS)
-00:13:35 | WARNING | jarvis.platform              | JARVIS is running in Demo Mode (simulated desktop).
-00:13:35 | INFO    | jarvis.tools.registry        | Registered 58 tools (15 categories)
+00:19:10 | INFO    | jarvis.app                   | JARVIS 1.0.0 starting (data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS)
+00:19:10 | WARNING | jarvis.platform              | JARVIS is running in Demo Mode (simulated desktop).
+00:19:10 | INFO    | jarvis.tools.registry        | Registered 58 tools (15 categories)
 
 Ollama is not reachable. Install it from https://ollama.com/download, pull a model, then re-run 'jarvis doctor'. Everything else above is unaffected.
-00:13:37 | INFO    | jarvis.core.runtime          | Shutting down JARVIS
+00:19:12 | INFO    | jarvis.core.runtime          | Shutting down JARVIS
 JARVIS 1.0.0 - data dir: C:\Users\runneradmin\AppData\Roaming\JARVIS
 
 Ollama
@@ -67,60 +67,106 @@ Simulation
 
 exit=3
 === smoke-version.out.log ===
+JARVIS 1.0.0
+Python 3.11.9 on win32
+Data dir: C:\Users\RUNNER~1\AppData\Local\Temp\jarvis-ci-data
 
 === smoke-version.err.log ===
-Traceback (most recent call last):
-  File "__main__.py", line 7, in <module>
-ImportError: attempted relative import with no known parent package
+
+=== smoke-doctor.out.log ===
+JARVIS 1.0.0 - data dir: C:\Users\RUNNER~1\AppData\Local\Temp\jarvis-ci-data
+
+Ollama
+  installed: yes
+  reachable: NO at 127.0.0.1:11434
+  models installed: 0
+  main model: (none selected)
+  vision model: (none selected)
+  fast model: (none selected)
+
+Tools
+  registered: 58    available here: 58
+
+Screen and input
+OK  input            simulated          Demo Mode: actions are applied to a simulated desktop
+OK  screen_capture   simulated          Demo Mode: rendered in-process
+OK  window_control   simulated          Demo Mode
+OK  ui_elements      simulated          Demo Mode: full control tree
+OK  ocr              simulated          Demo Mode: reads the simulated UI text
+OK  applications     simulated          Demo Mode: 10 simulated apps + generic factory
+OK  audio            simulated          Demo Mode: system volume is simulated
+OK  simulation       simulated-desktop  Demo Mode is ACTIVE - no real desktop access
+
+Voice
+  recognition: on   synthesis: on   activation: push_to_talk
+  recognition: none (not available)
+  synthesis:   none (not available)
+
+Safety
+  mode: balanced   automation master switch: on
+  RAM ceiling: 12 GB   VRAM ceiling: 8 GB
+  current RAM: 0.05 GB   pressure: ok
+
+Simulation
+  demo/simulated mode: YES - actions are not real
+
+=== smoke-doctor.err.log ===
+00:19:06 | INFO    | jarvis.app                   | JARVIS 1.0.0 starting (data dir: C:\Users\RUNNER~1\AppData\Local\Temp\jarvis-ci-data)
+00:19:06 | WARNING | jarvis.platform              | JARVIS is running in Demo Mode (simulated desktop).
+00:19:06 | INFO    | jarvis.tools.registry        | Registered 58 tools (15 categories)
+00:19:06 | INFO    | jarvis.integrations.smtc     | SMTC unavailable: Windows.Media.Control projection is not installed (pip install winrt-Windows.Media.Control)
+
+Ollama is not reachable. Install it from https://ollama.com/download, pull a model, then re-run 'jarvis doctor'. Everything else above is unaffected.
+00:19:08 | INFO    | jarvis.core.runtime          | Shutting down JARVIS
 
 === pyinstaller (last 40 lines) ===
-51532 INFO: Analyzing run-time hooks ...
-51542 INFO: Including run-time hook 'pyi_rth_pkgutil.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
-51544 INFO: Including run-time hook 'pyi_rth_multiprocessing.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
-51545 INFO: Including run-time hook 'pyi_rth_inspect.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
-51546 INFO: Including run-time hook 'pyi_rth_pythoncom.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\rthooks'
-51548 INFO: Including run-time hook 'pyi_rth_pywintypes.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\rthooks'
-51548 INFO: Including run-time hook 'pyi_rth_setuptools.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
-51548 INFO: Including run-time hook 'pyi_rth_pyside6.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
-51550 INFO: Processing pre-find-module-path hook 'hook-_pyi_rth_utils.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\pre_find_module_path'
-51552 INFO: Processing standard module hook 'hook-_pyi_rth_utils.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
-51572 INFO: Creating base_library.zip...
-51588 INFO: Looking for dynamic libraries
-52681 INFO: Extra DLL search directories (AddDllDirectory): ['C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\shiboken6', 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\rapidfuzz.libs', 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\numpy.libs', 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\av.libs', 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\ctranslate2']
-52681 INFO: Extra DLL search directories (PATH): ['C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PySide6']
-55099 INFO: Warnings written to D:\a\JARVIS-Local-AI\JARVIS-Local-AI\build\jarvis\warn-jarvis.txt
-55228 INFO: Graph cross-reference written to D:\a\JARVIS-Local-AI\JARVIS-Local-AI\build\jarvis\xref-jarvis.html
-55626 INFO: checking PYZ
-55636 INFO: Building because toc changed
-55636 INFO: Building PYZ (ZlibArchive) D:\a\JARVIS-Local-AI\JARVIS-Local-AI\build\jarvis\PYZ-00.pyz
-56932 INFO: Building PYZ (ZlibArchive) D:\a\JARVIS-Local-AI\JARVIS-Local-AI\build\jarvis\PYZ-00.pyz completed successfully.
-56958 INFO: checking PKG
-56958 INFO: Building because D:\a\JARVIS-Local-AI\JARVIS-Local-AI\build\jarvis\PYZ-00.pyz changed
-56958 INFO: Building PKG (CArchive) JARVIS.pkg
-56977 INFO: Building PKG (CArchive) JARVIS.pkg completed successfully.
-56979 INFO: Bootloader C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\bootloader\Windows-64bit-intel\runw.exe
-56979 INFO: checking EXE
-56979 INFO: Rebuilding EXE-00.toc because pkg is more recent
-56979 INFO: Building EXE from EXE-00.toc
-56981 INFO: Copying bootloader EXE to D:\a\JARVIS-Local-AI\JARVIS-Local-AI\build\jarvis\JARVIS.exe
-56983 INFO: Copying icon to EXE
-56985 INFO: Copying 0 resources to EXE
-56985 INFO: Embedding manifest in EXE
-56986 INFO: Appending PKG archive to EXE
-56993 INFO: Fixing EXE headers
-57068 INFO: Building EXE from EXE-00.toc completed successfully.
-57071 INFO: checking COLLECT
-57076 INFO: Removing dir D:\a\JARVIS-Local-AI\JARVIS-Local-AI\dist\JARVIS
-57132 INFO: Building COLLECT COLLECT-00.toc
-57653 INFO: Building COLLECT COLLECT-00.toc completed successfully.
-57661 INFO: Build complete! The results are available in: D:\a\JARVIS-Local-AI\JARVIS-Local-AI\dist
+68442 INFO: Analyzing run-time hooks ...
+68450 INFO: Including run-time hook 'pyi_rth_pkgutil.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+68452 INFO: Including run-time hook 'pyi_rth_multiprocessing.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+68454 INFO: Including run-time hook 'pyi_rth_inspect.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+68458 INFO: Including run-time hook 'pyi_rth_pythoncom.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\rthooks'
+68458 INFO: Including run-time hook 'pyi_rth_pywintypes.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\rthooks'
+68460 INFO: Including run-time hook 'pyi_rth_setuptools.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+68460 INFO: Including run-time hook 'pyi_rth_pyside6.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+68462 INFO: Processing pre-find-module-path hook 'hook-_pyi_rth_utils.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\pre_find_module_path'
+68464 INFO: Processing standard module hook 'hook-_pyi_rth_utils.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+68493 INFO: Creating base_library.zip...
+68515 INFO: Looking for dynamic libraries
+69976 INFO: Extra DLL search directories (AddDllDirectory): ['C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\shiboken6', 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\rapidfuzz.libs', 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\numpy.libs', 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\av.libs', 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\ctranslate2']
+69976 INFO: Extra DLL search directories (PATH): ['C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PySide6']
+73384 INFO: Warnings written to D:\a\JARVIS-Local-AI\JARVIS-Local-AI\build\jarvis\warn-jarvis.txt
+73561 INFO: Graph cross-reference written to D:\a\JARVIS-Local-AI\JARVIS-Local-AI\build\jarvis\xref-jarvis.html
+74080 INFO: checking PYZ
+74145 INFO: Building because toc changed
+74145 INFO: Building PYZ (ZlibArchive) D:\a\JARVIS-Local-AI\JARVIS-Local-AI\build\jarvis\PYZ-00.pyz
+75627 INFO: Building PYZ (ZlibArchive) D:\a\JARVIS-Local-AI\JARVIS-Local-AI\build\jarvis\PYZ-00.pyz completed successfully.
+75661 INFO: checking PKG
+75662 INFO: Building because D:\a\JARVIS-Local-AI\JARVIS-Local-AI\build\jarvis\PYZ-00.pyz changed
+75662 INFO: Building PKG (CArchive) JARVIS.pkg
+75686 INFO: Building PKG (CArchive) JARVIS.pkg completed successfully.
+75686 INFO: Bootloader C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\bootloader\Windows-64bit-intel\runw.exe
+75686 INFO: checking EXE
+75688 INFO: Rebuilding EXE-00.toc because pkg is more recent
+75688 INFO: Building EXE from EXE-00.toc
+75688 INFO: Copying bootloader EXE to D:\a\JARVIS-Local-AI\JARVIS-Local-AI\build\jarvis\JARVIS.exe
+75692 INFO: Copying icon to EXE
+75694 INFO: Copying 0 resources to EXE
+75694 INFO: Embedding manifest in EXE
+75710 INFO: Appending PKG archive to EXE
+75718 INFO: Fixing EXE headers
+75818 INFO: Building EXE from EXE-00.toc completed successfully.
+75821 INFO: checking COLLECT
+75825 INFO: Removing dir D:\a\JARVIS-Local-AI\JARVIS-Local-AI\dist\JARVIS
+75898 INFO: Building COLLECT COLLECT-00.toc
+76335 INFO: Building COLLECT COLLECT-00.toc completed successfully.
+76345 INFO: Build complete! The results are available in: D:\a\JARVIS-Local-AI\JARVIS-Local-AI\dist
 
 === pyinstaller (first 40 lines) ===
-138 INFO: PyInstaller: 6.22.3, contrib hooks: 2026.9
-138 INFO: Python: 3.11.9
-152 INFO: Platform: Windows-10-10.0.26100-SP0
-152 INFO: Python environment: C:\hostedtoolcache\windows\Python\3.11.9\x64
-158 INFO: Module search paths (PYTHONPATH):
+123 INFO: PyInstaller: 6.22.3, contrib hooks: 2026.9
+123 INFO: Python: 3.11.9
+133 INFO: Platform: Windows-10-10.0.26100-SP0
+133 INFO: Python environment: C:\hostedtoolcache\windows\Python\3.11.9\x64
+138 INFO: Module search paths (PYTHONPATH):
 ['D:\\a\\JARVIS-Local-AI\\JARVIS-Local-AI',
  'D:\\a\\JARVIS-Local-AI\\JARVIS-Local-AI',
  'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\python311.zip',
@@ -131,31 +177,31 @@ ImportError: attempted relative import with no known parent package
  'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\win32',
  'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\win32\\lib',
  'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\pythonwin',
+ 'D:\\a\\JARVIS-Local-AI\\JARVIS-Local-AI\\packaging',
  'D:\\a\\JARVIS-Local-AI\\JARVIS-Local-AI']
-461 INFO: checking Analysis
-482 INFO: Building because excludes changed
-482 INFO: Looking for Python shared library...
-482 INFO: Using Python shared library: C:\hostedtoolcache\windows\Python\3.11.9\x64\python311.dll
-482 INFO: Running Analysis Analysis-00.toc
-482 INFO: Target bytecode optimization level: 0
-482 INFO: Initializing module dependency graph...
-484 INFO: Initializing module graph hook caches...
-504 INFO: Analyzing modules for base_library.zip ...
-1338 INFO: Processing standard module hook 'hook-heapq.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
-1427 INFO: Processing standard module hook 'hook-encodings.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
-2854 INFO: Processing standard module hook 'hook-math.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
-2930 INFO: Processing standard module hook 'hook-pickle.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
-4167 INFO: Caching module dependency graph...
-4199 INFO: Analyzing D:\a\JARVIS-Local-AI\JARVIS-Local-AI\jarvis\__main__.py
-4201 INFO: Analyzing hidden import 'jarvis'
-4201 INFO: Analyzing hidden import 'jarvis.app'
-4653 INFO: Processing standard module hook 'hook-platform.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
-4685 INFO: Processing standard module hook 'hook-psutil.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
-4716 INFO: Processing standard module hook 'hook-_ctypes.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
-4987 INFO: Processing standard module hook 'hook-sqlite3.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
-5298 INFO: Processing standard module hook 'hook-xml.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
-5313 INFO: Processing standard module hook 'hook-xml.etree.cElementTree.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
-5434 INFO: Processing standard module hook 'hook-difflib.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+464 INFO: checking Analysis
+498 INFO: Building because excludes changed
+498 INFO: Looking for Python shared library...
+498 INFO: Using Python shared library: C:\hostedtoolcache\windows\Python\3.11.9\x64\python311.dll
+498 INFO: Running Analysis Analysis-00.toc
+498 INFO: Target bytecode optimization level: 0
+498 INFO: Initializing module dependency graph...
+500 INFO: Initializing module graph hook caches...
+522 INFO: Analyzing modules for base_library.zip ...
+1439 INFO: Processing standard module hook 'hook-heapq.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+1530 INFO: Processing standard module hook 'hook-encodings.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+2970 INFO: Processing standard module hook 'hook-math.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+3067 INFO: Processing standard module hook 'hook-pickle.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+4550 INFO: Caching module dependency graph...
+4591 INFO: Analyzing D:\a\JARVIS-Local-AI\JARVIS-Local-AI\packaging\launcher.py
+5174 INFO: Processing standard module hook 'hook-platform.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+5226 INFO: Processing standard module hook 'hook-psutil.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+5267 INFO: Processing standard module hook 'hook-_ctypes.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+5784 INFO: Processing standard module hook 'hook-sqlite3.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+6330 INFO: Processing standard module hook 'hook-xml.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+6347 INFO: Processing standard module hook 'hook-xml.etree.cElementTree.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+6510 INFO: Processing standard module hook 'hook-difflib.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+6532 INFO: Processing standard module hook 'hook-PIL.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
 
 === pip freeze (relevant) ===
 
