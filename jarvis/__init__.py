@@ -2,6 +2,9 @@
 
 Version history
 ---------------
+1.0.4  Fix a start-up crash: the tray icon fallback used a Qt enum that does
+       not exist (StandardPixelMetric instead of StandardPixmap) and is now
+       crash-proof; the icon ships inside the frozen bundle.
 1.0.3  Real-app vision: OCR fallback now fires when UI Automation exposes only
        window chrome (Spotify and other Electron apps), with OCR coordinates
        mapped to true screen positions.  Stumbled tasks are never remembered
@@ -22,7 +25,7 @@ Version history
        keeps JARVIS inside a 12 GB RAM / 8 GB VRAM budget.
 """
 
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 __app_name__ = "JARVIS"
 __author__ = "JARVIS Project"
 

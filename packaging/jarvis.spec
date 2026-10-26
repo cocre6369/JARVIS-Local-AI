@@ -71,7 +71,12 @@ a = Analysis(
     [str(ROOT / "packaging" / "launcher.py")],
     pathex=[str(ROOT)],
     binaries=[],
-    datas=[],
+    datas=[
+        # The tray/window icon must ship inside the bundle: paths.icon_path()
+        # looks under <bundle>/packaging/assets, and without it the frozen exe
+        # falls back to a standard style icon.
+        (str(ROOT / "packaging" / "assets"), "packaging/assets"),
+    ],
     hiddenimports=HIDDEN_IMPORTS,
     hookspath=[str(ROOT / "packaging" / "hooks")],
     hooksconfig={},
