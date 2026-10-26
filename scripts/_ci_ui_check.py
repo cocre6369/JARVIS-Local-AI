@@ -58,7 +58,12 @@ def main() -> int:
 
     title = window.windowTitle()
     print(f"UI CHECK OK: {title!r}, pages: {', '.join(PAGE_ORDER)}")
-    window.close()
+    # Do NOT call window.close(): closeEvent -> quit_application opens a modal
+    # quit-confirmation dialog, which blocks forever on a headless runner.
+    # Tear the timers and runtime down directly instead.
+    window._drain_timer.stop()
+    window._metrics_timer.stop()
+    window.hide()
     try:
         runtime.shutdown()
     except Exception:  # noqa: BLE001
