@@ -12,8 +12,8 @@ machine through [Ollama](https://ollama.com).
 
 | File | What it is |
 |---|---|
-| **[JARVIS-Setup-1.0.0.exe](https://github.com/cocre6369/JARVIS-Local-AI/releases/download/v1.0.0/JARVIS-Setup-1.0.0.exe)** | **Recommended.** Double-click installer — no admin rights needed, creates desktop & Start Menu shortcuts, opens the first-run wizard. |
-| [JARVIS-portable-1.0.0.zip](https://github.com/cocre6369/JARVIS-Local-AI/releases/download/v1.0.0/JARVIS-portable-1.0.0.zip) | No-install version — unzip anywhere and run `JARVIS\JARVIS.exe`. |
+| **[JARVIS-Setup-1.0.1.exe](https://github.com/cocre6369/JARVIS-Local-AI/releases/download/v1.0.1/JARVIS-Setup-1.0.1.exe)** | **Recommended.** Double-click installer — no admin rights needed, creates desktop & Start Menu shortcuts, opens the first-run wizard. |
+| [JARVIS-portable-1.0.1.zip](https://github.com/cocre6369/JARVIS-Local-AI/releases/download/v1.0.1/JARVIS-portable-1.0.1.zip) | No-install version — unzip anywhere and run `JARVIS\JARVIS.exe`. |
 
 New releases always appear on the **[Releases page](https://github.com/cocre6369/JARVIS-Local-AI/releases)**;
 the "latest release" link above automatically points at the newest one.
@@ -71,5 +71,5 @@ The `.exe` cannot be cross-compiled — CI builds it on a real Windows runner
 
 ## License & status
 
-Version 1.0.0 — first complete build. See [Project Jarvis Design Prompt.txt](Project%20Jarvis%20Design%20Prompt.txt)
+Version 1.0.1 — first complete build + launch fixes. See [Project Jarvis Design Prompt.txt](Project%20Jarvis%20Design%20Prompt.txt)
 for the full design specification.

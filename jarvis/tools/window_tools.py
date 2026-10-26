@@ -76,22 +76,43 @@ class LaunchApplicationTool(Tool):
             return self._fail("An application name is required.")
         args = [str(a) for a in (arguments or [])][:8]
         backend = self.ctx.platform.apps
+
+        # Already running?  Never start a second copy: single-instance apps
+        # (Spotify, Discord, Steam, ...) react to a duplicate launch by flashing
+        # a window and exiting, which the user sees as "opening and closing".
+        window, process = self._find_running(name)
+        if window is not None:
+            self._show(window)
+            return ToolResult(
+                ok=True,
+                message=f"{name} was already running; brought its window to the front.",
+                data={"already_running": True, "window": _window_dict(window)},
+                evidence={"running": True, "window_title": window.title,
+                          "already_running": True})
+        if process is not None:
+            # Running without a visible window (minimised to the tray, or still
+            # starting up).  Give it a few seconds to show one; do NOT relaunch.
+            window = self._wait_for_window(name, None, 5.0)
+            if window is not None:
+                self._show(window)
+            return ToolResult(
+                ok=True,
+                message=(f"{name} is already running (process '{process.name}', "
+                         f"PID {process.pid})"
+                         + (" and its window is now in front." if window else
+                            " but has no visible window - it may sit in the system "
+                            "tray. It was NOT started a second time.")),
+                data={"already_running": True, "process": process.as_dict(),
+                      "window": _window_dict(window) if window else None},
+                evidence={"running": True, "already_running": True,
+                          "process": process.name,
+                          "window_title": window.title if window else ""})
+
         candidates = []
         try:
             candidates = backend.resolve(name, limit=5) or []
         except Exception as exc:  # noqa: BLE001
             return self._fail(f"Application search failed: {exc}")
-
-        # Already running?  Focus instead of double-launching.
-        running = self._already_running(name)
-        if running:
-            self.ctx.platform.windows.focus(running)
-            return ToolResult(
-                ok=True,
-                message=f"{name} was already running; brought its window to the front.",
-                data={"already_running": True, "window": _window_dict(running),
-                      "candidates": [c.as_dict() for c in candidates[:3]]},
-                evidence={"running": True, "window_title": running.title})
 
         if not candidates:
             installed = []
@@ -132,35 +153,66 @@ class LaunchApplicationTool(Tool):
                 data=data,
                 evidence={"running": True, "window_title": appeared.title,
                           "waited_s": round(elapsed, 2)})
+        _w, proc = self._find_running(name)
         return ToolResult(
             ok=True,
             message=(f"{best.name} was started but no window appeared within "
                      f"{timeout:.0f}s. It may still be loading, or it may run "
                      "without a window."),
             data=data,
-            evidence={"running": bool(self._already_running(name)),
+            evidence={"running": proc is not None, "process": proc.name if proc else "",
                       "window_title": ""},
             suggest_observe=True)
 
     # ------------------------------------------------------------------
-    def _already_running(self, name: str) -> Optional[Any]:
+    def _find_running(self, name: str) -> tuple:
+        """Return (window, process) for an already-running app, either may be None.
+
+        The process check matters: an app minimised to the system tray has no
+        window, and launching "again" only makes single-instance apps flash.
+        """
+        low = (name or "").lower().strip()
+        if not low:
+            return None, None
+        window = None
         try:
             windows = self.ctx.platform.windows.windows() or []
-        except Exception:  # noqa: BLE001
-            return None
-        low = (name or "").lower()
+        except Exception as exc:  # noqa: BLE001
+            log.debug("window enumeration failed: %s", exc)
+            windows = []
         for w in windows:
-            proc = (w.process_name or "").lower()
+            proc = (w.process_name or "").lower().replace(".exe", "")
             title = (w.title or "").lower()
-            if low and (low in proc.replace(".exe", "") or low in title):
-                return w
-        return None
+            if low in proc or low in title:
+                window = w
+                break
+        process = None
+        try:
+            for p in self.ctx.platform.windows.processes() or []:
+                pname = (p.name or "").lower().replace(".exe", "")
+                if pname and (low in pname or pname in low):
+                    process = p
+                    break
+        except Exception as exc:  # noqa: BLE001
+            log.debug("process enumeration failed: %s", exc)
+        return window, process
+
+    def _show(self, win: Any) -> None:
+        try:
+            if getattr(win, "is_minimised", False):
+                self.ctx.platform.windows.restore(win)
+            else:
+                self.ctx.platform.windows.focus(win)
+        except Exception as exc:  # noqa: BLE001
+            log.debug("focus/restore failed: %s", exc)
 
     def _wait_for_window(self, name: str, best: Any, timeout: float) -> Optional[Any]:
         deadline = time.time() + timeout
-        stem = os.path.splitext(os.path.basename(str(best.target)))[0].lower()
+        stem = ""
+        if best is not None:
+            stem = os.path.splitext(os.path.basename(str(best.target)))[0].lower()
         keys = sorted({k for k in [
-            (name or "").lower(), (best.name or "").lower(), stem,
+            (name or "").lower(), (getattr(best, "name", "") or "").lower(), stem,
         ] if k and len(k) > 1})
         while time.time() < deadline:
             try:
@@ -171,8 +223,10 @@ class LaunchApplicationTool(Tool):
                 proc = (w.process_name or "").lower().replace(".exe", "")
                 title = (w.title or "").lower()
                 if any(k in proc or k in title for k in keys):
-                    if not w.is_minimised:
-                        return w
+                    # A minimised window still counts as "appeared" - the caller
+                    # restores it.  Skipping it here made successful launches
+                    # look failed and tempted the agent to launch again.
+                    return w
             # Poll fast when adaptive waits are on: a window that appears in
             # 300 ms should not cost a fixed quarter-second each time.
             time.sleep(timing.poll_interval(self.ctx)
@@ -182,12 +236,18 @@ class LaunchApplicationTool(Tool):
     def verify(self, args: Dict[str, Any], result: ToolResult) -> Verification:
         ev = result.evidence or {}
         title = ev.get("window_title") or ""
-        ok = bool(ev.get("running")) and bool(title)
+        proc = ev.get("process") or ""
+        ok = bool(ev.get("running")) and bool(title or proc or ev.get("already_running"))
+        if ok and title:
+            detail = f"Window '{title}' is present"
+        elif ok:
+            detail = (f"Process '{proc}' is running but shows no window yet "
+                      "(background/tray or still starting)")
+        else:
+            detail = (f"No window and no matching process found "
+                      f"(running={ev.get('running')})")
         return Verification(
-            checked=True, succeeded=ok,
-            detail=(f"Window '{title}' is present and in front" if ok else
-                    f"Process state: running={ev.get('running')}, window='{title}'"),
-            evidence=ev)
+            checked=True, succeeded=ok, detail=detail, evidence=ev)
 
 
 class CloseApplicationTool(Tool):

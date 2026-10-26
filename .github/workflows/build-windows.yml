@@ -78,6 +78,29 @@ jobs:
           # the step explicitly - exit 3 here would mark a healthy build failed.
           exit 0
 
+      - name: Static gate - no undefined names
+        shell: pwsh
+        run: |
+          # v1.0.0 shipped a NameError that compileall cannot catch: a Qt class
+          # used but never imported.  ruff's F821/F822 finds exactly that.
+          python -m pip install --quiet "ruff>=0.6"
+          python -m ruff check --select F821,F822 jarvis scripts
+          if ($LASTEXITCODE -ne 0) { throw "undefined names found" }
+          exit 0
+
+      - name: Verify the UI builds (offscreen)
+        shell: pwsh
+        run: |
+          # Constructs the real MainWindow + every page with Qt's offscreen
+          # platform, so a page that crashes on open fails the build here
+          # instead of on the user's desktop.
+          $env:QT_QPA_PLATFORM = "offscreen"
+          $env:JARVIS_DEMO = "1"
+          $env:JARVIS_DATA_DIR = "$env:TEMP\jarvis-ci-ui"
+          python scripts/_ci_ui_check.py *>&1 | Tee-Object -FilePath ci-ui.log | Write-Host
+          if ($LASTEXITCODE -ne 0) { throw "offscreen UI build check failed (see ci-ui.log)" }
+          exit 0
+
       - name: Run the test suite
         shell: pwsh
         run: |
@@ -184,7 +207,7 @@ jobs:
           $lines += (python -m jarvis.cli doctor --no-speech 2>&1 | Out-String)
           $lines += ("exit=" + $LASTEXITCODE)
           python -m PyInstaller packaging/jarvis.spec --noconfirm *> ci-pyinstaller.log
-          foreach ($f in "smoke-version.out.log","smoke-version.err.log","smoke-doctor.out.log","smoke-doctor.err.log","choco-innosetup.log","iscc.log") {
+          foreach ($f in "ci-ui.log","smoke-version.out.log","smoke-version.err.log","smoke-doctor.out.log","smoke-doctor.err.log","choco-innosetup.log","iscc.log") {
             if (Test-Path $f) { $lines += "=== $f ==="; $lines += (Get-Content $f -Tail 60 | Out-String) }
           }
           $lines += "=== pyinstaller (last 40 lines) ==="
@@ -197,9 +220,10 @@ jobs:
           $lines -join "`n" | Out-File -FilePath ci-diagnostics.log -Encoding utf8
           git config user.name "CI Diagnostics"
           git config user.email "ci@users.noreply.github.com"
-          git add ci-diagnostics.log ci-pyinstaller.log
+          git add -f ci-diagnostics.log ci-pyinstaller.log
           git commit -m "ci-diag: windows build failure diagnostics [skip ci]"
           git push origin HEAD:${{ github.ref_name }}
+          exit 0
 
       - name: Upload artefacts
         uses: actions/upload-artifact@v4

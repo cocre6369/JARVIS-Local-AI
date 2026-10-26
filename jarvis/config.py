@@ -20,6 +20,7 @@ import os
 import tempfile
 import threading
 from dataclasses import dataclass, field, is_dataclass
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from . import paths
