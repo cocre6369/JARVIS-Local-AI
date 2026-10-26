@@ -78,6 +78,29 @@ jobs:
           # the step explicitly - exit 3 here would mark a healthy build failed.
           exit 0
 
+      - name: Static gate - no undefined names
+        shell: pwsh
+        run: |
+          # v1.0.0 shipped a NameError that compileall cannot catch: a Qt class
+          # used but never imported.  ruff's F821/F822 finds exactly that.
+          python -m pip install --quiet "ruff>=0.6"
+          python -m ruff check --select F821,F822 jarvis scripts
+          if ($LASTEXITCODE -ne 0) { throw "undefined names found" }
+          exit 0
+
+      - name: Verify the UI builds (offscreen)
+        shell: pwsh
+        run: |
+          # Constructs the real MainWindow + every page with Qt's offscreen
+          # platform, so a page that crashes on open fails the build here
+          # instead of on the user's desktop.
+          $env:QT_QPA_PLATFORM = "offscreen"
+          $env:JARVIS_DEMO = "1"
+          $env:JARVIS_DATA_DIR = "$env:TEMP\jarvis-ci-ui"
+          python scripts/_ci_ui_check.py
+          if ($LASTEXITCODE -ne 0) { throw "offscreen UI build check failed" }
+          exit 0
+
       - name: Run the test suite
         shell: pwsh
         run: |
