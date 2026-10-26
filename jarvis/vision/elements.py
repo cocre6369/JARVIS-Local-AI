@@ -318,6 +318,31 @@ def match_elements(query: str, elements: Sequence[UIElement],
     return matches[:limit]
 
 
+def words_to_screen(words: Sequence[OcrWord], img_w: int, img_h: int,
+                    orig_w: int, orig_h: int, off_x: int = 0,
+                    off_y: int = 0) -> List[OcrWord]:
+    """Map OCR word rects from the captured image into SCREEN coordinates.
+
+    Observations OCR a *resized* and possibly *window-cropped* screenshot, so
+    raw word rects point at image pixels, not screen pixels - clicking them
+    lands in the wrong place.  ``img_*`` is the OCR'd image size, ``orig_*``
+    the captured region size before resizing, ``off_*`` the region's screen
+    origin (0,0 for a full-monitor capture).
+    """
+    if not words or img_w <= 0 or img_h <= 0:
+        return list(words or [])
+    sx = (orig_w / float(img_w)) if orig_w else 1.0
+    sy = (orig_h / float(img_h)) if orig_h else 1.0
+    out: List[OcrWord] = []
+    for w in words:
+        r = w.rect
+        out.append(OcrWord(
+            text=w.text, confidence=w.confidence,
+            rect=Rect(int(off_x + r.x * sx), int(off_y + r.y * sy),
+                      max(1, int(r.width * sx)), max(1, int(r.height * sy)))))
+    return out
+
+
 def ocr_words_to_elements(words: Sequence[OcrWord]) -> List[UIElement]:
     """Turn OCR words into pseudo-elements (used when UIA is unavailable)."""
     out: List[UIElement] = []

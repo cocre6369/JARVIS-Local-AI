@@ -87,6 +87,7 @@ class MainWindow(QMainWindow):
         self._stream_text: List[str] = []
         self._streaming = False
         self._tray: Optional[QSystemTrayIcon] = None
+        self.orb: Optional[Any] = None
 
         name = self.settings.general.assistant_name or "JARVIS"
         self.setWindowTitle(f"{name} — local AI assistant")
@@ -102,6 +103,7 @@ class MainWindow(QMainWindow):
         self._build_ui()
         self._build_shortcuts()
         self._build_tray()
+        self._build_orb()
 
         self._drain_timer = QTimer(self)
         self._drain_timer.setInterval(30)
@@ -261,8 +263,6 @@ class MainWindow(QMainWindow):
             shortcut.activated.connect(lambda page=page_id: self.show_page(page))
 
     def _build_tray(self) -> None:
-        if not bool(self.settings.ui.close_to_tray):
-            return
         if not QSystemTrayIcon.isSystemTrayAvailable():
             return
         icon = self.windowIcon()
@@ -290,6 +290,23 @@ class MainWindow(QMainWindow):
         self._tray.setToolTip(f"{name} - local AI assistant")
         self._tray.activated.connect(self._tray_activated)
         self._tray.show()
+
+    def _build_orb(self) -> None:
+        """The floating bottom-right orb: state colours + mini chat.
+
+        Independent top-level widget, so it stays visible (and JARVIS keeps
+        working) when this window is minimised or closed to the tray.
+        """
+        self.orb = None
+        if not bool(getattr(self.settings.ui, "show_desktop_orb", True)):
+            return
+        try:
+            from .widgets.orb import DesktopOrb
+
+            self.orb = DesktopOrb(self.controller, self.theme)
+            self.orb.show()
+        except Exception:  # noqa: BLE001 - the orb is an enhancement, never fatal
+            log.exception("desktop orb could not be created")
 
     # ------------------------------------------------------------------
     # navigation
@@ -385,6 +402,8 @@ class MainWindow(QMainWindow):
         if kind == K_STATE:
             state = str(payload.get("state", "idle"))
             self.status_strip.set_state(state)
+            if self.orb is not None:
+                self.orb.set_state(state)
             dashboard = self.pages.get("dashboard")
             if dashboard is not None:
                 dashboard.core_panel.set_state(state)
@@ -400,6 +419,8 @@ class MainWindow(QMainWindow):
                 self._end_stream(text)
             else:
                 self.conversation.append_line(role, text, ts=payload.get("ts"))
+            if self.orb is not None:
+                self.orb.append_line(role, text)
         elif kind == K_THOUGHT:
             thought = str(payload.get("thought", ""))
             if thought and bool(self.settings.ui.show_tool_trace):
@@ -431,6 +452,11 @@ class MainWindow(QMainWindow):
             if listening:
                 self.command_bar.set_mic_listening(False)
         elif kind == K_LEVEL:
+            if self.orb is not None:
+                try:
+                    self.orb.set_level(float(payload.get("level", 0.0)))
+                except Exception:  # noqa: BLE001
+                    pass
             dashboard = self.pages.get("dashboard")
             if dashboard is not None:
                 dashboard.core_panel.set_levels(mic=float(payload.get("level", 0.0)))
@@ -613,6 +639,11 @@ class MainWindow(QMainWindow):
             return
         self._drain_timer.stop()
         self._metrics_timer.stop()
+        if self.orb is not None:
+            try:
+                self.orb.close()
+            except Exception:  # noqa: BLE001
+                pass
         try:
             self.controller.shutdown()
         except Exception:  # noqa: BLE001

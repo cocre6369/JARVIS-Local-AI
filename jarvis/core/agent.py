@@ -994,6 +994,12 @@ class Agent:
         """
         if status != "completed":
             return
+        # A flow that stumbled (any failed step, or the same action repeated)
+        # is not a flow worth replaying blind: a flailing session that happened
+        # to end "completed" once taught JARVIS to re-open the same wrong apps.
+        if int(getattr(task, "failures", 0) or 0) > 0 \
+                or int(getattr(task, "repeated_actions", 0) or 0) > 0:
+            return
         request = str(getattr(task, "request", "") or "").strip()
         if not request or len(request) > 140:
             return

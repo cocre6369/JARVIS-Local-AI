@@ -2,6 +2,12 @@
 
 Version history
 ---------------
+1.0.3  Real-app vision: OCR fallback now fires when UI Automation exposes only
+       window chrome (Spotify and other Electron apps), with OCR coordinates
+       mapped to true screen positions.  Stumbled tasks are never remembered
+       as replay shortcuts.  Closing the window minimises to the tray (locked
+       on) and JARVIS keeps working; a floating bottom-right orb shows the
+       agent state in colour with a fold-out mini chat.
 1.0.2  No more flashing cmd windows: every child process is spawned console-free.
        Apps must finish LOADING before JARVIS acts: launch waits for real
        content, and element lookups keep re-looking while a UI loads.
@@ -16,7 +22,7 @@ Version history
        keeps JARVIS inside a 12 GB RAM / 8 GB VRAM budget.
 """
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 __app_name__ = "JARVIS"
 __author__ = "JARVIS Project"
 

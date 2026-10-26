@@ -36,6 +36,7 @@ from .elements import (
     match_elements,
     ocr_words_to_elements,
     summarise_elements,
+    words_to_screen,
 )
 
 log = logging.getLogger(__name__)
@@ -291,6 +292,12 @@ class VisionService:
         image_path = ""
         image_b64 = ""
         width = height = 0
+        # Geometry of the capture, so OCR word rects (which live in the
+        # resized, possibly window-cropped image) can be mapped back to real
+        # screen coordinates before they become clickable elements.
+        orig_w = orig_h = 0          # captured region size before resizing
+        resized_w = resized_h = 0    # saved image size that OCR actually reads
+        off_x = off_y = 0            # screen origin of the captured region
         masked_regions: List[Rect] = []
         phash = ""
         want_image = include_image and self.guard_allows_image()
@@ -304,8 +311,14 @@ class VisionService:
                     captured = self.platform.screen.capture(region=active.rect)
                     if captured is not None:
                         notes.append(f"Captured the '{active.title}' window only.")
-                if captured is None:
+                if captured is not None:
+                    orig_w, orig_h = captured.width, captured.height
+                    if active is not None and captured.width != self._screen_width():
+                        off_x, off_y = active.rect.x, active.rect.y
+                else:
                     captured = self.platform.screen.capture(monitor=v.capture_monitor)
+                    if captured is not None:
+                        orig_w, orig_h = captured.width, captured.height
                 if captured is None:
                     notes.append("Screen capture returned nothing.")
                 else:
@@ -349,6 +362,7 @@ class VisionService:
                                  max(1, int(r.height * scale_y)))
                             for r in masked_regions]
                     width, height = img.width, img.height
+                    resized_w, resized_h = img.width, img.height
                     from .. import paths
 
                     paths.prune_scratch(max_files=12, max_age_seconds=900)
@@ -394,12 +408,20 @@ class VisionService:
                 if pw_rects:
                     ocr = _scrub_ocr(ocr, pw_rects)
 
-        # UIA gave us nothing -> fall back to OCR-derived pseudo elements so
-        # "find the settings button" still works from pixels alone.
-        if include_elements and not elements and ocr.words:
-            elements = ocr_words_to_elements(ocr.words)
-            notes.append("UI Automation returned no controls; using OCR text boxes "
-                         "as clickable elements.")
+        # UIA gave us nothing but window chrome (Electron apps like Spotify
+        # expose an empty control tree) -> fall back to OCR-derived pseudo
+        # elements so "find the search box" still works from pixels alone.
+        if include_elements and ocr.words and self._count_content(elements) < 3:
+            words = ocr.words
+            if resized_w and orig_w and (orig_w != resized_w or off_x or off_y):
+                words = words_to_screen(words, resized_w, resized_h,
+                                        orig_w, orig_h, off_x, off_y)
+            ocr_elements = ocr_words_to_elements(words)
+            kept = [e for e in elements if self._is_content(e)]
+            elements = kept + ocr_elements
+            notes.append(f"UI Automation exposed only {len(kept)} content controls; "
+                         f"added {len(ocr_elements)} OCR text boxes as clickable "
+                         "elements.")
 
         # 5. change detection ---------------------------------------------
         changed = True
@@ -545,7 +567,17 @@ class VisionService:
 
     #: Element control types that are window furniture, not content.
     _CHROME_TYPES = frozenset({"window", "titlebar", "menubar", "scrollbar",
-                               "thumb", "splitbutton"})
+                               "thumb", "splitbutton", "pane", "group",
+                               "custom", "document"})
+
+    def _is_content(self, el: Any) -> bool:
+        ctype = (getattr(el, "control_type", "") or "").lower()
+        if ctype in self._CHROME_TYPES and not (getattr(el, "name", "") or "").strip():
+            return False
+        return bool((getattr(el, "name", "") or "").strip() or ctype)
+
+    def _count_content(self, elements: Any) -> int:
+        return sum(1 for el in (elements or []) if self._is_content(el))
 
     def _content_elements(self, obs: "Observation") -> int:
         """How many *content* elements an observation exposes.
@@ -553,14 +585,7 @@ class VisionService:
         Window chrome (frame, title bar, scrollbars) does not count: a blank,
         still-loading app shell exposes exactly that and nothing else.
         """
-        count = 0
-        for el in obs.elements or []:
-            ctype = (getattr(el, "control_type", "") or "").lower()
-            if ctype in self._CHROME_TYPES:
-                continue
-            if getattr(el, "name", "") or ctype:
-                count += 1
-        return count
+        return self._count_content(obs.elements)
 
     def _content_pixels(self, obs: "Observation") -> float:
         """Std-dev of the target window's pixels: ~0 for a blank shell,
@@ -612,13 +637,16 @@ class VisionService:
         stddev = 0.0
         while True:
             obs = self.observe(window_title=window_title, include_image=True,
-                               include_ocr=False, force=True,
+                               include_ocr=True, force=True,
                                reason=reason or "wait_until_ready")
             polls += 1
             elements = self._content_elements(obs)
-            stddev = self._content_pixels(obs) if elements < min_content else 0.0
-            has_content = elements >= min_content or stddev >= 6.0
-            fingerprint = (elements, round(stddev, 1))
+            ocr_words = len(getattr(obs.ocr, "words", []) or [])
+            stddev = (self._content_pixels(obs)
+                      if elements < min_content and ocr_words < 3 else 0.0)
+            has_content = (elements >= min_content or ocr_words >= 3
+                           or stddev >= 6.0)
+            fingerprint = (elements, ocr_words, round(stddev, 1))
             if has_content:
                 if fingerprint == last:
                     stable += 1
