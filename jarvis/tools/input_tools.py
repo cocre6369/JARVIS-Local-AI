@@ -58,7 +58,9 @@ def _resolve(ctx: ToolContext, description: str, window: str = "",
     deadline = time.time() + _element_wait_budget(ctx, wait_s)
     found: Dict[str, Any] = {}
     while True:
-        found = ctx.vision.find_element(description, fresh=True,
+        # 0.55 floor: below that the "match" is usually an unrelated control
+        # and acting on it does random things to whatever is on screen.
+        found = ctx.vision.find_element(description, fresh=True, min_score=0.55,
                                         prefer_types=prefer_types,
                                         require_pattern=require_pattern)
         if found.get("matches") or time.time() >= deadline:
@@ -67,7 +69,7 @@ def _resolve(ctx: ToolContext, description: str, window: str = "",
     if not found.get("matches") and (prefer_types or require_pattern):
         # Nothing of the wanted kind exists.  Retry without the intent filter
         # so the caller can report the nearest thing instead of nothing at all.
-        fallback = ctx.vision.find_element(description, fresh=True)
+        fallback = ctx.vision.find_element(description, fresh=True, min_score=0.55)
         fallback["intent_filtered_out"] = True
         return fallback
     return found

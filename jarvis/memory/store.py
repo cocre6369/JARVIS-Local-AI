@@ -480,7 +480,9 @@ class MemoryStore:
             if not tokens:
                 continue
             overlap = len(q_tokens & tokens) / max(1, len(q_tokens | tokens))
-            if overlap >= 0.45:
+            # 0.60, not 0.45: at 0.45 "open brave" was close enough to an old
+            # "open spotify ..." task to replay that task's stale steps.
+            if overlap >= 0.60:
                 scored.append((overlap, t))
         scored.sort(key=lambda x: -x[0])
         return [t for _s, t in scored[:limit]]

@@ -87,3 +87,25 @@ def test_close_to_tray_is_locked_on():
     s.sanitize()
     assert s.ui.close_to_tray is True          # locked: closing must never quit
     assert s.ui.show_desktop_orb is True
+
+
+def test_similar_task_replay_needs_a_close_request(runtime):
+    mem = runtime.memory
+    mem.start_task("open spotify and play violent crimes by kanye west", model="m")
+    rec = mem.list_tasks(limit=1)[0]
+    mem.finish_task(rec.id, "completed", summary="played it")
+
+    # "open brave" shares only the word "open" - must NOT be considered similar
+    assert mem.similar_tasks("open brave", limit=3) == []
+    # a near-identical request still is
+    assert mem.similar_tasks("open spotify and play violent crimes kanye west",
+                             limit=3)
+
+
+def test_element_matching_refuses_weak_matches(runtime):
+    runtime.registry.execute("launch_application", {"name": "Spotify"})
+    found = runtime.registry.execute(
+        "find_element", {"description": "quantum zebra flux capacitor"})
+    assert not found.ok, "an unrelated description must not 'match' a control"
+    good = runtime.registry.execute("find_element", {"description": "search"})
+    assert good.ok, "a real control must still be found"
