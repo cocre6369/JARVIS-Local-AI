@@ -99,6 +99,18 @@ class AutomationPage(Page):
         self.launch_wait.setSingleStep(0.5)
         self.launch_wait.setDecimals(1)
         self.launch_wait.setValue(float(a.app_launch_wait_s))
+        self.ready_wait = QDoubleSpinBox()
+        self.ready_wait.setRange(0.0, 60.0)
+        self.ready_wait.setSingleStep(1.0)
+        self.ready_wait.setDecimals(1)
+        self.ready_wait.setSuffix(" s")
+        self.ready_wait.setValue(float(a.app_ready_wait_s))
+        self.element_wait = QDoubleSpinBox()
+        self.element_wait.setRange(0.0, 30.0)
+        self.element_wait.setSingleStep(0.5)
+        self.element_wait.setDecimals(1)
+        self.element_wait.setSuffix(" s")
+        self.element_wait.setValue(float(a.element_wait_s))
         self.smooth_mouse = QCheckBox("Move the mouse smoothly (visible, slightly slower)")
         self.smooth_mouse.setChecked(bool(a.move_mouse_smoothly))
         self.mouse_duration = QDoubleSpinBox()
@@ -121,6 +133,8 @@ class AutomationPage(Page):
         form.addRow("Keystroke interval (s)", self.typing_interval)
         form.addRow("Settle after a click (s)", self.click_settle)
         form.addRow("Wait after launching (s)", self.launch_wait)
+        form.addRow("Wait for app content (s)", self.ready_wait)
+        form.addRow("Keep looking for elements (s)", self.element_wait)
         form.addRow("", self.smooth_mouse)
         form.addRow("Mouse move duration (s)", self.mouse_duration)
         form.addRow("", self.adaptive)
@@ -258,6 +272,8 @@ class AutomationPage(Page):
         self.typing_interval.setValue(float(a.typing_interval_s))
         self.click_settle.setValue(float(a.click_settle_s))
         self.launch_wait.setValue(float(a.app_launch_wait_s))
+        self.ready_wait.setValue(float(a.app_ready_wait_s))
+        self.element_wait.setValue(float(a.element_wait_s))
         self.smooth_mouse.setChecked(bool(a.move_mouse_smoothly))
         self.mouse_duration.setValue(float(a.mouse_move_duration_s))
         self.adaptive.setChecked(bool(a.adaptive_waits))
@@ -325,6 +341,8 @@ class AutomationPage(Page):
                 "typing_interval_s": float(self.typing_interval.value()),
                 "click_settle_s": float(self.click_settle.value()),
                 "app_launch_wait_s": float(self.launch_wait.value()),
+                "app_ready_wait_s": float(self.ready_wait.value()),
+                "element_wait_s": float(self.element_wait.value()),
                 "move_mouse_smoothly": bool(self.smooth_mouse.isChecked()),
                 "mouse_move_duration_s": float(self.mouse_duration.value()),
                 "adaptive_waits": bool(self.adaptive.isChecked()),

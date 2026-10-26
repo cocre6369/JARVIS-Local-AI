@@ -543,6 +543,100 @@ class VisionService:
                               "application window.")
         return result
 
+    #: Element control types that are window furniture, not content.
+    _CHROME_TYPES = frozenset({"window", "titlebar", "menubar", "scrollbar",
+                               "thumb", "splitbutton"})
+
+    def _content_elements(self, obs: "Observation") -> int:
+        """How many *content* elements an observation exposes.
+
+        Window chrome (frame, title bar, scrollbars) does not count: a blank,
+        still-loading app shell exposes exactly that and nothing else.
+        """
+        count = 0
+        for el in obs.elements or []:
+            ctype = (getattr(el, "control_type", "") or "").lower()
+            if ctype in self._CHROME_TYPES:
+                continue
+            if getattr(el, "name", "") or ctype:
+                count += 1
+        return count
+
+    def _content_pixels(self, obs: "Observation") -> float:
+        """Std-dev of the target window's pixels: ~0 for a blank shell,
+        high once real content has painted.  0.0 when no image is available.
+        """
+        try:
+            from PIL import Image  # bundled dependency; guarded for headless CI
+
+            raw = None
+            if obs.image_b64:
+                raw = io.BytesIO(base64.b64decode(obs.image_b64))
+            elif obs.image_path and os.path.exists(obs.image_path):
+                raw = obs.image_path
+            if raw is None:
+                return 0.0
+            img = Image.open(raw).convert("L")
+            rect = (obs.active_window or {}).get("rect") or {}
+            w, h = img.size
+            x = max(0, min(int(rect.get("x", 0)), w - 1))
+            y = max(0, min(int(rect.get("y", 0)), h - 1))
+            x2 = max(x + 1, min(x + int(rect.get("width", w)), w))
+            y2 = max(y + 1, min(y + int(rect.get("height", h)), h))
+            img = img.crop((x, y, x2, y2)).resize((48, 48))
+            px = list(img.getdata())
+            mean = sum(px) / len(px)
+            var = sum((v - mean) ** 2 for v in px) / len(px)
+            return var ** 0.5
+        except Exception:  # noqa: BLE001 - a missing signal is never an error
+            return 0.0
+
+    def wait_until_ready(self, window_title: str = "", timeout_s: float = 10.0,
+                         interval_s: float = 0.35, min_content: int = 2,
+                         reason: str = "") -> Dict[str, Any]:
+        """Wait until the target window has actually LOADED, not just appeared.
+
+        "Loaded" means content - UIA elements beyond the window furniture, or
+        real pixels inside the window rect - and a result that stays identical
+        for two consecutive polls (loading spinners keep changing).  Never
+        raises; on timeout it reports ready=False so the caller can proceed
+        with open eyes instead of acting on a blank shell.
+        """
+        started = time.time()
+        timeout_s = max(0.0, float(timeout_s))
+        deadline = started + timeout_s
+        last: Optional[Tuple[int, float]] = None
+        stable = 0
+        polls = 0
+        elements = 0
+        stddev = 0.0
+        while True:
+            obs = self.observe(window_title=window_title, include_image=True,
+                               include_ocr=False, force=True,
+                               reason=reason or "wait_until_ready")
+            polls += 1
+            elements = self._content_elements(obs)
+            stddev = self._content_pixels(obs) if elements < min_content else 0.0
+            has_content = elements >= min_content or stddev >= 6.0
+            fingerprint = (elements, round(stddev, 1))
+            if has_content:
+                if fingerprint == last:
+                    stable += 1
+                else:
+                    stable = 0
+                if stable >= 1:  # two consecutive identical, content-bearing polls
+                    return {"ready": True, "waited_s": round(time.time() - started, 2),
+                            "polls": polls, "content_elements": elements,
+                            "content_stddev": round(stddev, 2)}
+            else:
+                stable = 0
+            last = fingerprint
+            if time.time() >= deadline:
+                return {"ready": False, "waited_s": round(time.time() - started, 2),
+                        "polls": polls, "content_elements": elements,
+                        "content_stddev": round(stddev, 2)}
+            time.sleep(min(interval_s, max(0.05, deadline - time.time())))
+
 
 # ---------------------------------------------------------------------------
 def _draw_cursor(rgb: bytearray, width: int, height: int, platform: Any,

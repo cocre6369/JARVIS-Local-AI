@@ -121,6 +121,11 @@ class SimWindow:
         return None
 
     def visible_elements(self) -> List[SimElement]:
+        # A window that is still loading exposes no content: the real Spotify
+        # shows a blank shell for a second or two, and Demo Mode must behave
+        # the same so the wait-for-ready logic is exercised honestly.
+        if not self.ready:
+            return []
         return [e for e in self.elements if e.visible(self)]
 
     def info(self, active: bool = False) -> WindowInfo:

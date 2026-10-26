@@ -13,6 +13,8 @@ the Qt event loop is never blocked.
 
 from __future__ import annotations
 
+from .. import _proc
+
 import json
 import logging
 import socket
@@ -729,7 +731,7 @@ def is_ollama_installed() -> Dict[str, Any]:
         try:
             import subprocess
 
-            out = subprocess.run([path, "--version"], capture_output=True,
+            out = _proc.run([path, "--version"], capture_output=True,
                                  text=True, timeout=6)
             version = (out.stdout or out.stderr).strip().splitlines()[0] if (
                 out.stdout or out.stderr) else ""

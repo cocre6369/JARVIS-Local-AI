@@ -7,6 +7,8 @@ import logging
 import os
 import shlex
 import subprocess
+
+from .. import _proc
 import time
 from typing import Any, Dict, List, Optional, Sequence
 
@@ -301,7 +303,7 @@ class SetDarkModeTool(Tool):
                               "color-scheme", scheme], "gnome"))
         for cmd, label in attempts:
             try:
-                out = subprocess.run(cmd, capture_output=True, text=True, timeout=8)
+                out = _proc.run(cmd, capture_output=True, text=True, timeout=8)
                 if out.returncode == 0:
                     return ToolResult(ok=True, message=f"Dark mode {'on' if on else 'off'} via {label}",
                                       data={"route": label},
@@ -583,7 +585,7 @@ def _read_clipboard(ctx: ToolContext) -> Optional[str]:
             if not os.path.exists(os.path.dirname(cmd[0]) or "") and \
                     not _which(cmd[0]):
                 continue
-            out = subprocess.run(list(cmd), capture_output=True, text=True, timeout=5)
+            out = _proc.run(list(cmd), capture_output=True, text=True, timeout=5)
             if out.returncode == 0:
                 return out.stdout
         except Exception:  # noqa: BLE001
@@ -606,7 +608,7 @@ def _write_clipboard(ctx: ToolContext, text: str) -> bool:
         try:
             if not _which(cmd[0]):
                 continue
-            proc = subprocess.run(list(cmd), input=text, text=True, timeout=5)
+            proc = _proc.run(list(cmd), input=text, text=True, timeout=5)
             if proc.returncode == 0:
                 return True
         except Exception:  # noqa: BLE001
@@ -677,7 +679,7 @@ class RunCommandTool(Tool):
 
         argv, shell = _build_argv(command)
         try:
-            proc = subprocess.run(
+            proc = _proc.run(
                 argv, shell=shell, cwd=workdir, capture_output=True, text=True,
                 timeout=timeout, encoding="utf-8", errors="replace",
                 env=_clean_env())

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import time
+
 from typing import Any, Dict, List
 
 from ..security.policy import Risk
@@ -101,6 +103,10 @@ class FindElementTool(Tool):
                 "refresh": {"type": "boolean",
                             "description": "Re-capture the screen first instead of "
                                            "using the last observation."},
+                "wait_s": {"type": "number",
+                           "description": "Seconds to keep re-looking while the UI "
+                                          "loads (default from settings; 0 = single "
+                                          "look)."},
             },
             "required": ["description"],
         },
@@ -112,7 +118,7 @@ class FindElementTool(Tool):
     )
 
     def run(self, description: str = "", window: str = "", refresh: bool = False,
-            **_: Any) -> ToolResult:
+            wait_s=None, **_: Any) -> ToolResult:
         if not (description or "").strip():
             return self._fail("A description is required.")
         vision = self.ctx.vision
@@ -120,7 +126,18 @@ class FindElementTool(Tool):
             return self._fail("The vision subsystem is not initialised.")
         if window:
             vision.observe(window_title=window, reason="find_element:window")
-        found = vision.find_element(description, fresh=bool(refresh))
+        automation = getattr(self.settings, "automation", None)
+        default = float(getattr(automation, "element_wait_s", 6.0) or 0.0)
+        ceiling = float(getattr(automation, "max_wait_s", 30.0) or 30.0)
+        budget = default if wait_s is None else max(0.0, float(wait_s))
+        deadline = time.time() + min(budget, max(ceiling, 0.0))
+        while True:
+            found = vision.find_element(description, fresh=True)
+            # A just-opened app is often still blank; a first miss is not an
+            # answer - keep re-observing until the budget runs out.
+            if found.get("match_dicts") or time.time() >= deadline:
+                break
+            time.sleep(0.35)
         matches = found.get("match_dicts") or []
         top = matches[0] if matches else None
         data: Dict[str, Any] = {

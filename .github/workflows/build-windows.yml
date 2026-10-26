@@ -88,6 +88,15 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "undefined names found" }
           exit 0
 
+      - name: Static gate - no console-flashing subprocess calls
+        shell: pwsh
+        run: |
+          # Every child process must go through jarvis/_proc.py, or cmd windows
+          # flash on screen next to the windowed JARVIS.exe.
+          python scripts/_ci_subprocess_gate.py
+          if ($LASTEXITCODE -ne 0) { throw "raw subprocess calls found" }
+          exit 0
+
       - name: Verify the UI builds (offscreen)
         shell: pwsh
         run: |

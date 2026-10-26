@@ -18,6 +18,8 @@ import logging
 import os
 import shutil
 import subprocess
+
+from .. import _proc
 import time
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -250,7 +252,7 @@ class X11Windows:
 
     def _run(self, cmd: List[str], timeout: float = 6.0) -> str:
         try:
-            out = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+            out = _proc.run(cmd, capture_output=True, text=True, timeout=timeout)
             return out.stdout or ""
         except Exception as exc:  # noqa: BLE001
             log.debug("%s failed: %s", cmd, exc)

@@ -14,6 +14,8 @@ import logging
 import os
 import shutil
 import subprocess
+
+from .. import _proc
 import time
 from typing import Optional, Sequence
 
@@ -414,7 +416,7 @@ class XDoToolInput:
 
     def _run(self, *args: str) -> bool:
         try:
-            out = subprocess.run([self.bin, *args], capture_output=True, text=True,
+            out = _proc.run([self.bin, *args], capture_output=True, text=True,
                                  timeout=10)
             return out.returncode == 0
         except Exception as exc:  # noqa: BLE001
@@ -444,7 +446,7 @@ class XDoToolInput:
 
     def position(self) -> Point:
         try:
-            out = subprocess.run([self.bin, "getmouselocation", "--shell"],
+            out = _proc.run([self.bin, "getmouselocation", "--shell"],
                                  capture_output=True, text=True, timeout=5)
             vals = dict(l.split("=", 1) for l in out.stdout.splitlines() if "=" in l)
             return Point(int(vals.get("X", 0)), int(vals.get("Y", 0)))
