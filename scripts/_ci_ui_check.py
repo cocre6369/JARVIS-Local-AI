@@ -12,8 +12,13 @@ Run:  QT_QPA_PLATFORM=offscreen python scripts/_ci_ui_check.py
 
 from __future__ import annotations
 
+import faulthandler
 import os
 import sys
+
+# Hard ceiling: if anything below blocks (a modal dialog, an event loop), dump
+# every traceback and exit non-zero instead of stalling the whole pipeline.
+faulthandler.dump_traceback_later(150, exit=True)
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("JARVIS_DEMO", "1")
@@ -29,6 +34,9 @@ def main() -> int:
     from jarvis.app import build_application
 
     runtime = build_application(demo=True, with_speech=False, realtime=False)
+    # Mark the first run as done: otherwise MainWindow schedules the setup
+    # wizard, whose modal exec() would block forever under processEvents().
+    runtime.settings_provider().general.first_run_complete = True
     app = QApplication.instance() or QApplication(sys.argv[:1])
 
     from jarvis.ui.main_window import MainWindow
