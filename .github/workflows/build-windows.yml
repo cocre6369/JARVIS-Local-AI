@@ -125,17 +125,25 @@ jobs:
         shell: pwsh
         run: |
           $version = python -c "import jarvis; print(jarvis.__version__)"
-          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
-          if (-not (Test-Path $iscc)) { $iscc = "${env:ProgramFiles}\Inno Setup 6\ISCC.exe" }
-          if (-not (Test-Path $iscc)) {
+          $candidates = @(
+            "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+            "${env:ProgramFiles}\Inno Setup 6\ISCC.exe"
+          )
+          $iscc = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $iscc) {
             # Not preinstalled on this image: fetch it the same way a user would.
-            choco install innosetup --yes --no-progress | Out-Null
-            $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+            Write-Host "Inno Setup not preinstalled - installing via choco"
+            choco install innosetup --yes --no-progress *>&1 | Tee-Object -FilePath choco-innosetup.log | Select-Object -Last 20 | Write-Host
+            $iscc = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
           }
-          if (-not (Test-Path $iscc)) { throw "Inno Setup not found on runner" }
-          & $iscc /DAppVersion=$version /Odist /F"JARVIS-Setup-$version" packaging/installer.iss
-          if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed" }
+          if (-not $iscc) { $iscc = (Get-Command iscc -ErrorAction SilentlyContinue).Source }
+          if (-not $iscc) { throw "Inno Setup not found on runner (see choco-innosetup.log)" }
+          Write-Host "Using ISCC: $iscc"
+          & $iscc "/DAppVersion=$version" /Odist "/FJARVIS-Setup-$version" packaging\installer.iss *>&1 |
+            Tee-Object -FilePath iscc.log | Select-Object -Last 40 | Write-Host
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed (see iscc.log)" }
           "app_version=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+          exit 0
 
       - name: Package a portable zip
         shell: pwsh
@@ -159,7 +167,7 @@ jobs:
           $lines += (python -m jarvis.cli doctor --no-speech 2>&1 | Out-String)
           $lines += ("exit=" + $LASTEXITCODE)
           python -m PyInstaller packaging/jarvis.spec --noconfirm *> ci-pyinstaller.log
-          foreach ($f in "smoke-version.out.log","smoke-version.err.log","smoke-doctor.out.log","smoke-doctor.err.log") {
+          foreach ($f in "smoke-version.out.log","smoke-version.err.log","smoke-doctor.out.log","smoke-doctor.err.log","choco-innosetup.log","iscc.log") {
             if (Test-Path $f) { $lines += "=== $f ==="; $lines += (Get-Content $f -Tail 60 | Out-String) }
           }
           $lines += "=== pyinstaller (last 40 lines) ==="
