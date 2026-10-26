@@ -33,6 +33,13 @@ def main() -> int:
 
     from jarvis.app import build_application
 
+    from jarvis import paths as _paths
+
+    # Force the icon-missing path: in the frozen bundle the icon may be absent,
+    # and MainWindow's fallback branch must not crash (v1.0.3 shipped a crash
+    # here that CI never saw because the repo copy of the icon always exists).
+    _paths.icon_path = lambda: _paths.Path("/definitely/not/here.ico")
+
     runtime = build_application(demo=True, with_speech=False, realtime=False)
     # Mark the first run as done: otherwise MainWindow schedules the setup
     # wizard, whose modal exec() would block forever under processEvents().

@@ -267,8 +267,16 @@ class MainWindow(QMainWindow):
             return
         icon = self.windowIcon()
         if icon.isNull():
-            icon = QApplication.style().standardIcon(
-                QApplication.style().StandardPixelMetric.SP_ComputerIcon)
+            # StandardPixmap (not StandardPixelMetric) is the enum for
+            # standardIcon - and a tray icon must never be able to crash
+            # start-up, so any style surprise degrades to an empty icon.
+            try:
+                from PySide6.QtWidgets import QStyle
+
+                icon = QApplication.style().standardIcon(
+                    QStyle.StandardPixmap.SP_ComputerIcon)
+            except Exception:  # noqa: BLE001
+                log.debug("standard tray icon unavailable", exc_info=True)
         self._tray = QSystemTrayIcon(icon, self)
         name = self.settings.general.assistant_name or "JARVIS"
         show_action = QAction(f"Show {name}", self)
