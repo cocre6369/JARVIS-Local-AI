@@ -2,6 +2,9 @@
 
 Version history
 ---------------
+1.0.2  No more flashing cmd windows: every child process is spawned console-free.
+       Apps must finish LOADING before JARVIS acts: launch waits for real
+       content, and element lookups keep re-looking while a UI loads.
 1.0.1  Fix a launch crash (missing Qt imports on the Voice page) and the
        "app keeps opening and closing" bug: launch_application now detects
        already-running apps by process as well as window (tray apps included)
@@ -13,7 +16,7 @@ Version history
        keeps JARVIS inside a 12 GB RAM / 8 GB VRAM budget.
 """
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 __app_name__ = "JARVIS"
 __author__ = "JARVIS Project"
 

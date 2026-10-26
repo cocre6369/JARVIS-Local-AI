@@ -23,6 +23,8 @@ import queue
 import re
 import shutil
 import subprocess
+
+from .. import _proc
 import sys
 import threading
 import time
@@ -397,7 +399,7 @@ class PiperTTS(TextToSpeech):
                "--output-raw"]
         if rate and abs(rate - 1.0) > 0.01:
             cmd += ["--length-scale", f"{1.0 / max(0.25, rate):.3f}"]
-        proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        proc = _proc.popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                 stderr=subprocess.DEVNULL)
         self._current_proc = proc
         try:
@@ -639,7 +641,7 @@ class EspeakTTS(TextToSpeech):
         cmd = [self._exe, "-v", espeak_voice_for(self.settings),
                "-s", str(rate), "-a", str(volume), "-p", str(pitch),
                "-w", "-", chunk]
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        proc = _proc.popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         self._current_proc = proc
         try:
             wav_bytes, _ = proc.communicate(timeout=60)
@@ -701,7 +703,7 @@ def _play_wav_file(path: str) -> None:
         args = [exe, path] if player != "ffplay" else \
             [exe, "-nodisp", "-autoexit", "-loglevel", "quiet", path]
         try:
-            subprocess.run(args, check=False, timeout=120,
+            _proc.run(args, check=False, timeout=120,
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             return
         except Exception as exc:  # noqa: BLE001

@@ -32,17 +32,38 @@ BUTTONS = ("left", "right", "middle")
 EDITABLE = tuple(EDITABLE_TYPES)
 
 
+def _element_wait_budget(ctx: ToolContext, wait_s: Optional[float]) -> float:
+    """How long to keep re-looking for an element while a UI loads."""
+    automation = getattr(ctx.settings, "automation", None)
+    default = float(getattr(automation, "element_wait_s", 6.0) or 0.0)
+    ceiling = float(getattr(automation, "max_wait_s", 30.0) or 30.0)
+    budget = default if wait_s is None else max(0.0, float(wait_s))
+    return min(budget, max(ceiling, 0.0))
+
+
 def _resolve(ctx: ToolContext, description: str, window: str = "",
              prefer_types: Sequence[str] = (),
-             require_pattern: Optional[str] = None) -> Dict[str, Any]:
-    """Ask the vision service for the best element matching a description."""
-    if window and ctx.vision is not None:
-        ctx.vision.observe(window_title=window, reason="resolve:window")
+             require_pattern: Optional[str] = None,
+             wait_s: Optional[float] = None) -> Dict[str, Any]:
+    """Ask the vision service for the best element matching a description.
+
+    A just-opened app is often still blank (Spotify loads for a second or two),
+    so a first miss is NOT an answer: keep re-observing until the element shows
+    up or the wait budget runs out.  Only then report "not found".
+    """
     if ctx.vision is None:
         return {}
-    found = ctx.vision.find_element(description, fresh=True,
-                                    prefer_types=prefer_types,
-                                    require_pattern=require_pattern)
+    if window:
+        ctx.vision.observe(window_title=window, reason="resolve:window")
+    deadline = time.time() + _element_wait_budget(ctx, wait_s)
+    found: Dict[str, Any] = {}
+    while True:
+        found = ctx.vision.find_element(description, fresh=True,
+                                        prefer_types=prefer_types,
+                                        require_pattern=require_pattern)
+        if found.get("matches") or time.time() >= deadline:
+            break
+        time.sleep(0.35)
     if not found.get("matches") and (prefer_types or require_pattern):
         # Nothing of the wanted kind exists.  Retry without the intent filter
         # so the caller can report the nearest thing instead of nothing at all.
@@ -132,6 +153,9 @@ class ClickElementTool(Tool):
                 "candidate": {"type": "integer",
                               "description": "Use the Nth ranked candidate (0 = best, "
                                              "default 0) when the best match is wrong."},
+                "wait_s": {"type": "number",
+                           "description": "Seconds to keep looking while the UI loads "
+                                          "(default from settings; 0 = fail fast)."},
             },
             "required": ["description"],
         },
@@ -139,14 +163,15 @@ class ClickElementTool(Tool):
         requires=("input", "screen_capture"), cost="medium")
 
     def run(self, description: str = "", window: str = "", button: str = "left",
-            clicks: int = 1, candidate: int = 0, **_: Any) -> ToolResult:
+            clicks: int = 1, candidate: int = 0, wait_s: Optional[float] = None,
+            **_: Any) -> ToolResult:
         if not (description or "").strip():
             return self._fail("A description of what to click is required.")
         button = (button or "left").lower()
         if button not in BUTTONS:
             button = "left"
         clicks = max(1, min(int(clicks or 1), 3))
-        found = _resolve(self.ctx, description, window)
+        found = _resolve(self.ctx, description, window, wait_s=wait_s)
         matches = found.get("matches") or []
         idx = max(0, min(int(candidate or 0), max(0, len(matches) - 1)))
         if matches and idx:

@@ -28,6 +28,8 @@ import shlex
 import shutil
 import struct
 import subprocess
+
+from .. import _proc
 import sys
 import time
 from dataclasses import dataclass, field
@@ -360,7 +362,7 @@ class WindowsApps:
             return []
         script = ("Get-StartApps | ForEach-Object { \"$($_.Name)`t$($_.AppID)\" }")
         try:
-            out = subprocess.run(
+            out = _proc.run(
                 ["powershell", "-NoProfile", "-NonInteractive", "-Command", script],
                 capture_output=True, text=True, timeout=25,
                 creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
@@ -456,20 +458,20 @@ class WindowsApps:
                 os.startfile(target)  # type: ignore[attr-defined]
                 return {"ok": True, "target": target, "kind": "url"}
             if target.lower().startswith("shell:"):
-                subprocess.Popen(["explorer.exe", target],
+                _proc.popen(["explorer.exe", target],
                                  creationflags=_detached_flags())
                 return {"ok": True, "target": target, "kind": "shell"}
             if os.path.isdir(target):
-                subprocess.Popen(["explorer.exe", os.path.normpath(target)],
+                _proc.popen(["explorer.exe", os.path.normpath(target)],
                                  creationflags=_detached_flags())
                 return {"ok": True, "target": target, "kind": "folder"}
             if os.path.isfile(target):
                 ext = os.path.splitext(target)[1].lower()
                 if ext in (".exe", ".com", ".scr"):
-                    subprocess.Popen([target, *args], cwd=os.path.dirname(target) or None,
+                    _proc.popen([target, *args], cwd=os.path.dirname(target) or None,
                                      creationflags=_detached_flags(), close_fds=True)
                 elif ext in (".bat", ".cmd"):
-                    subprocess.Popen(["cmd.exe", "/c", target, *args],
+                    _proc.popen(["cmd.exe", "/c", target, *args],
                                      cwd=os.path.dirname(target) or None,
                                      creationflags=_detached_flags())
                 else:
@@ -477,7 +479,7 @@ class WindowsApps:
                     os.startfile(target)  # type: ignore[attr-defined]
                 return {"ok": True, "target": target, "kind": "file", "pid": None}
             # Not a path: try `start` so file associations and App Paths apply.
-            subprocess.Popen(["cmd.exe", "/c", "start", "", target, *args],
+            _proc.popen(["cmd.exe", "/c", "start", "", target, *args],
                              creationflags=_detached_flags())
             return {"ok": True, "target": target, "kind": "association"}
         except FileNotFoundError as exc:
@@ -609,12 +611,12 @@ class DesktopApps:
         try:
             if target.startswith(("http://", "https://", "file://", "mailto:")):
                 opener = "xdg-open" if sys.platform.startswith("linux") else "open"
-                subprocess.Popen([opener, target])
+                _proc.popen([opener, target])
                 return {"ok": True, "target": target, "kind": "url"}
             if target.endswith(".desktop"):
                 launcher = shutil.which("gtk-launch")
                 if launcher:
-                    subprocess.Popen([launcher, os.path.basename(target)[:-8]])
+                    _proc.popen([launcher, os.path.basename(target)[:-8]])
                     return {"ok": True, "target": target, "kind": "desktop-entry"}
                 parsed = _parse_desktop(target)
                 if parsed:
@@ -622,7 +624,7 @@ class DesktopApps:
                 return {"ok": False, "error": "cannot parse .desktop entry"}
             if os.path.isdir(target):
                 opener = "xdg-open" if sys.platform.startswith("linux") else "open"
-                subprocess.Popen([opener, target])
+                _proc.popen([opener, target])
                 return {"ok": True, "target": target, "kind": "folder"}
             if not os.path.exists(target):
                 resolved = shutil.which(target)
@@ -630,9 +632,9 @@ class DesktopApps:
                     return {"ok": False, "error": f"not found: {target}"}
                 target = resolved
             if sys.platform == "darwin" and target.endswith(".app"):
-                subprocess.Popen(["open", "-a", target, *args])
+                _proc.popen(["open", "-a", target, *args])
             else:
-                subprocess.Popen([target, *args], start_new_session=True,
+                _proc.popen([target, *args], start_new_session=True,
                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             return {"ok": True, "target": target, "kind": "file"}
         except OSError as exc:

@@ -148,11 +148,33 @@ class LaunchApplicationTool(Tool):
             "waited_s": round(elapsed, 2),
         }
         if appeared:
+            # The window existing is not the app being usable: Spotify shows a
+            # blank shell while it loads.  Wait for real content (elements or
+            # pixels) so the next step never acts on a half-loaded UI.
+            ready = {"ready": True, "waited_s": 0.0}
+            budget = float(getattr(self.settings.automation,
+                                   "app_ready_wait_s", 12.0) or 0.0)
+            vision = getattr(self.ctx, "vision", None)
+            if budget > 0 and vision is not None and timing.adaptive(self.ctx):
+                try:
+                    ready = vision.wait_until_ready(
+                        window_title=appeared.title, timeout_s=budget,
+                        reason=f"launch:{best.name}")
+                except Exception as exc:  # noqa: BLE001
+                    log.debug("ready-wait failed: %s", exc)
+            data["ready"] = bool(ready.get("ready"))
+            data["ready_waited_s"] = ready.get("waited_s", 0.0)
+            message = (f"{best.name} is open and fully loaded."
+                       if ready.get("ready") else
+                       f"{best.name} opened, but its content was still loading "
+                       f"after {ready.get('waited_s', 0.0):.0f}s - observe the "
+                       f"screen again before acting on it.")
             return ToolResult(
-                ok=True, message=f"{best.name} is open and its window is ready.",
-                data=data,
+                ok=True, message=message, data=data,
                 evidence={"running": True, "window_title": appeared.title,
-                          "waited_s": round(elapsed, 2)})
+                          "waited_s": round(elapsed, 2),
+                          "ready": bool(ready.get("ready"))},
+                suggest_observe=not ready.get("ready"))
         _w, proc = self._find_running(name)
         return ToolResult(
             ok=True,

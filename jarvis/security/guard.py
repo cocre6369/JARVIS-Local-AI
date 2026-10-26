@@ -22,6 +22,8 @@ import logging
 import os
 import shutil
 import subprocess
+
+from .. import _proc
 import threading
 import time
 from dataclasses import dataclass, field
@@ -189,7 +191,7 @@ class GpuProbe:
             "--query-gpu=name,memory.used,memory.total,utilization.gpu,temperature.gpu",
             "--format=csv,noheader,nounits",
         ]
-        out = subprocess.run(cmd, capture_output=True, text=True, timeout=4)
+        out = _proc.run(cmd, capture_output=True, text=True, timeout=4)
         if out.returncode != 0:
             return {"available": False}
         line = out.stdout.strip().splitlines()[0]

@@ -169,6 +169,14 @@ class AutomationSettings:
     click_settle_s: float = 0.18
     #: Wait used after launching an application before observing it.
     app_launch_wait_s: float = 2.5
+    #: After the window appears, keep watching until the app has CONTENT (UI
+    #: elements / non-blank pixels) before acting on it - a blank Spotify shell
+    #: must not be treated as a loaded app.  0 disables the ready-wait.
+    app_ready_wait_s: float = 12.0
+    #: How long find_element / click_element / type keep re-looking for an
+    #: element while a UI is still loading, instead of failing instantly with
+    #: "could not find the search bar".  0 = fail on the first miss.
+    element_wait_s: float = 6.0
     generic_wait_s: float = 0.8
     max_wait_s: float = 30.0
     #: Agent loop limits (infinite-loop protection).
@@ -385,6 +393,8 @@ class Settings:
         a = self.automation
         a.settle_poll_interval_s = float(min(max(a.settle_poll_interval_s, 0.005), 0.5))
         a.observation_reuse_s = float(min(max(a.observation_reuse_s, 0.0), 15.0))
+        a.app_ready_wait_s = float(min(max(a.app_ready_wait_s, 0.0), 60.0))
+        a.element_wait_s = float(min(max(a.element_wait_s, 0.0), 30.0))
         a.browser_devtools_port = int(min(max(a.browser_devtools_port, 1024), 65535))
         v = self.vision
         v.uia_rich_threshold = int(min(max(v.uia_rich_threshold, 1), 500))
