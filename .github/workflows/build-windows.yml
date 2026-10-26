@@ -1,0 +1,223 @@
+name: build-windows
+
+# Builds the downloadable Windows executable and installer.
+#
+# The .exe cannot be cross-compiled: PyInstaller must run on Windows, so this
+# workflow is the supported way to produce the artefact a user downloads.
+# It runs on every tag (v*), on demand from the Actions tab, and on pushes to
+# the main development branch so a broken freeze is caught immediately.
+
+on:
+  push:
+    tags: ["v*"]
+    branches: ["main", "arena/*"]
+    paths-ignore:
+      - "**.md"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write          # needed only to attach the installer to a release
+
+concurrency:
+  group: build-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  freeze:
+    name: Freeze JARVIS for Windows
+    runs-on: windows-latest
+    timeout-minutes: 90
+    # The failure-diagnostics step below commits a log back to this branch;
+    # that commit must not start another build (it would loop).
+    if: ${{ !contains(github.event.head_commit.message, 'ci-diag') }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install -r requirements.txt
+          python -m pip install "pyinstaller>=6.3,<7"
+
+      - name: Generate the icon
+        shell: pwsh
+        run: python packaging/make_icon.py
+
+      - name: Verify the code compiles
+        shell: pwsh
+        run: |
+          python -m compileall -q jarvis
+          if ($LASTEXITCODE -ne 0) { throw "compileall failed" }
+
+      - name: Verify jarvis version runs headless
+        shell: pwsh
+        run: |
+          $env:JARVIS_DEMO = "1"
+          python -m jarvis.cli version
+          if ($LASTEXITCODE -ne 0) { throw "jarvis version failed with $LASTEXITCODE" }
+
+      - name: Verify the engine boots (doctor)
+        shell: pwsh
+        run: |
+          $env:JARVIS_DEMO = "1"
+          # doctor exits 3 when Ollama is simply not installed, which is the
+          # expected state on a build agent - anything else is a real failure.
+          python -m jarvis.cli doctor --no-speech
+          $code = $LASTEXITCODE
+          Remove-Item Env:JARVIS_DEMO
+          if ($code -notin 0, 3) { throw "jarvis doctor failed with $code" }
+          # The pwsh wrapper exits with the LAST native command's code, so end
+          # the step explicitly - exit 3 here would mark a healthy build failed.
+          exit 0
+
+      - name: Run the test suite
+        shell: pwsh
+        run: |
+          python -m pip install -r requirements-dev.txt
+          python -m pytest -q
+
+      - name: Freeze with PyInstaller
+        shell: pwsh
+        run: python -m PyInstaller packaging/jarvis.spec --noconfirm --clean
+
+      - name: Smoke-test the frozen executable
+        shell: pwsh
+        run: |
+          $exe = (Resolve-Path "dist\JARVIS\JARVIS.exe").Path
+          $env:JARVIS_DEMO = "1"
+          $env:JARVIS_DATA_DIR = "$env:TEMP\jarvis-ci-data"
+          # The frozen exe is a windowed app. In the runner's non-interactive
+          # session an error MessageBox would hang forever, so never use an
+          # unbounded -Wait: give it 180 s, kill it otherwise, and always dump
+          # the redirected stdout/stderr so a boot crash is visible in CI.
+          function Invoke-Frozen {
+            param([string]$Tag, [string[]]$Arguments)
+            $p = Start-Process -FilePath $exe -ArgumentList $Arguments -NoNewWindow -PassThru `
+                 -RedirectStandardOutput "smoke-$Tag.out.log" -RedirectStandardError "smoke-$Tag.err.log"
+            $hung = -not $p.WaitForExit(180000)
+            if ($hung) {
+              Write-Host "frozen exe '$Tag' was still running after 180 s - killing process tree"
+              try { $p.Kill($true) } catch {}
+            }
+            Write-Host "--- frozen '$Tag' stdout (hung=$hung, exit=$($p.ExitCode)) ---"
+            if (Test-Path "smoke-$Tag.out.log") { Get-Content "smoke-$Tag.out.log" -Tail 60 | Write-Host }
+            Write-Host "--- frozen '$Tag' stderr ---"
+            if (Test-Path "smoke-$Tag.err.log") { Get-Content "smoke-$Tag.err.log" -Tail 60 | Write-Host }
+            if ($hung) { return -1 }
+            return $p.ExitCode
+          }
+          $code = Invoke-Frozen "version" @("version")
+          if ($code -ne 0) { throw "frozen exe 'version' failed with $code" }
+          $code = Invoke-Frozen "doctor" @("doctor", "--no-speech")
+          if ($code -notin 0, 3) { throw "frozen exe 'doctor' failed with $code" }
+          Write-Host "frozen exe runs"
+          exit 0
+
+      - name: Build the Inno Setup installer
+        shell: pwsh
+        run: |
+          $version = python -c "import jarvis; print(jarvis.__version__)"
+          $candidates = @(
+            "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+            "${env:ProgramFiles}\Inno Setup 6\ISCC.exe"
+          )
+          $iscc = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $iscc) {
+            # Not preinstalled on this image: fetch it the same way a user would.
+            Write-Host "Inno Setup not preinstalled - installing via choco"
+            choco install innosetup --yes --no-progress *>&1 | Tee-Object -FilePath choco-innosetup.log | Select-Object -Last 20 | Write-Host
+            $iscc = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          }
+          if (-not $iscc) { $iscc = (Get-Command iscc -ErrorAction SilentlyContinue).Source }
+          if (-not $iscc) { throw "Inno Setup not found on runner (see choco-innosetup.log)" }
+          Write-Host "Using ISCC: $iscc"
+          # [Run] flags changed between Inno releases; probe which set this
+          # compiler accepts (each probe is a sub-second /Q compile) and pass
+          # the winner to installer.iss via /DRunFlags.
+          $flagsets = @("nowait postcreate skipifsilent", "nowait skipifsilent", "postcreate skipifsilent", "skipifsilent", "")
+          $probeHeader = "[Setup]\nAppName=flagprobe\nAppVersion=1.0\nDefaultDirName={tmp}\nOutputDir={tmp}\nDisableProgramGroupPage=yes\n[Run]\n".Replace("\n", [char]13 + [char]10)
+          $runFlags = $null
+          foreach ($fs in $flagsets) {
+            $runLine = 'Filename: "{sys}\notepad.exe"'
+            if ($fs) { $runLine += "; Flags: $fs" }
+            Set-Content -Path flagprobe.iss -Value ($probeHeader + $runLine)
+            & $iscc /Q flagprobe.iss *> $null
+            if ($LASTEXITCODE -eq 0) { $runFlags = $fs; break }
+          }
+          if ($null -eq $runFlags) { throw "no [Run] flag set compiles on this Inno version" }
+          $runFlagsLine = ""
+          if ($runFlags) { $runFlagsLine = "; Flags: $runFlags" }
+          Write-Host "Using [Run] flags: '$runFlags'"
+          & $iscc "/DAppVersion=$version" "/DRunFlagsLine=$runFlagsLine" /Odist "/FJARVIS-Setup-$version" packaging\installer.iss *>&1 |
+            Tee-Object -FilePath iscc.log | Select-Object -Last 40 | Write-Host
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed (see iscc.log)" }
+          "app_version=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+          exit 0
+
+      - name: Package a portable zip
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist\JARVIS -DestinationPath "dist\JARVIS-portable-${{ env.app_version }}.zip" -CompressionLevel Optimal
+
+      - name: Capture failure diagnostics
+        if: failure()
+        shell: pwsh
+        run: |
+          $lines = @()
+          $lines += "=== python ==="
+          $lines += (python --version 2>&1 | Out-String)
+          $lines += "=== compileall ==="
+          $lines += (python -m compileall jarvis 2>&1 | Out-String)
+          $env:JARVIS_DEMO = "1"
+          $lines += "=== jarvis version ==="
+          $lines += (python -m jarvis.cli version 2>&1 | Out-String)
+          $lines += ("exit=" + $LASTEXITCODE)
+          $lines += "=== jarvis doctor --no-speech ==="
+          $lines += (python -m jarvis.cli doctor --no-speech 2>&1 | Out-String)
+          $lines += ("exit=" + $LASTEXITCODE)
+          python -m PyInstaller packaging/jarvis.spec --noconfirm *> ci-pyinstaller.log
+          foreach ($f in "smoke-version.out.log","smoke-version.err.log","smoke-doctor.out.log","smoke-doctor.err.log","choco-innosetup.log","iscc.log") {
+            if (Test-Path $f) { $lines += "=== $f ==="; $lines += (Get-Content $f -Tail 60 | Out-String) }
+          }
+          $lines += "=== pyinstaller (last 40 lines) ==="
+          $lines += (Get-Content ci-pyinstaller.log -Tail 40 | Out-String)
+          $lines += "=== pyinstaller (first 40 lines) ==="
+          $lines += (Get-Content ci-pyinstaller.log -Head 40 | Out-String)
+          $lines += "=== pip freeze (relevant) ==="
+          $lines += (python -m pip freeze 2>&1 | Select-String -Pattern "PySide6|psutil|numpy|Pillow|mss|pywin32|uiautomation|comtypes|pygetwindow|faster|sounddevice|soundfile|webrtcvad|piper|winrt|pytesseract|rapidfuzz|pyinstaller" | Out-String)
+          Remove-Item Env:JARVIS_DEMO -ErrorAction SilentlyContinue
+          $lines -join "`n" | Out-File -FilePath ci-diagnostics.log -Encoding utf8
+          git config user.name "CI Diagnostics"
+          git config user.email "ci@users.noreply.github.com"
+          git add ci-diagnostics.log ci-pyinstaller.log
+          git commit -m "ci-diag: windows build failure diagnostics [skip ci]"
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Upload artefacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-windows
+          path: |
+            dist/JARVIS-Setup-*.exe
+            dist/JARVIS-portable-*.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish a GitHub release (tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/JARVIS-Setup-*.exe
+            dist/JARVIS-portable-*.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: false

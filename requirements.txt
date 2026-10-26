@@ -1,0 +1,58 @@
+# ---------------------------------------------------------------------------
+# JARVIS - core runtime dependencies
+#
+# Everything here is LOCAL. There are no cloud AI services, no paid APIs and
+# no telemetry endpoints anywhere in this project.
+#
+# Only PySide6 and psutil are strictly required to launch the application.
+# Every other dependency is optional and is imported lazily behind a
+# capability probe, so JARVIS degrades gracefully instead of crashing when a
+# component (microphone, OCR engine, TTS voice, ...) is missing.
+# ---------------------------------------------------------------------------
+
+# --- GUI -----------------------------------------------------------------
+PySide6>=6.6,<6.9          # Qt for Python - the whole user interface
+
+# --- System / resource guard --------------------------------------------
+psutil>=5.9                # RAM + CPU monitoring for the 12 GB budget
+
+# --- Screen capture / image handling ------------------------------------
+Pillow>=10.0               # screenshot resizing, masking of password fields
+mss>=9.0.1                 # fast multi-monitor screen capture
+numpy>=1.24                # pixel buffers for OCR / vision
+
+# --- Desktop automation (Windows first, cross platform fallbacks) --------
+pyautogui>=0.9.54 ; sys_platform == 'win32'
+pywin32>=306 ; sys_platform == 'win32'
+uiautomation>=2.0.18 ; sys_platform == 'win32'
+comtypes>=1.2.0 ; sys_platform == 'win32'
+pygetwindow>=0.0.9 ; sys_platform == 'win32'
+
+# --- Speech to text (local, offline) ------------------------------------
+# faster-whisper is the primary engine. It pulls in ctranslate2 which is a
+# compiled wheel, so it is pinned to a range known to ship Windows wheels.
+faster-whisper>=1.0.0
+sounddevice>=0.4.6
+soundfile>=0.12.1
+webrtcvad-wheels>=2.0.11   # voice activity detection / wake gating
+
+# --- Text to speech (local, offline) ------------------------------------
+piper-tts>=1.2.0           # high quality neural TTS, runs on CPU
+# Windows SAPI is used as an always-available fallback via pywin32.
+
+# --- OCR ----------------------------------------------------------------
+# Primary OCR backend on Windows 10/11 is the built-in
+# Windows.Media.Ocr engine (accessed through the `winrt` projections below),
+# which needs no extra model download. Tesseract is an optional fallback.
+# Native media-session control (Spotify play/pause/now-playing)
+winrt-Windows.Media.Control>=1.0.21033.1 ; sys_platform == 'win32'
+winrt-Windows.Foundation>=1.0.21033.1 ; sys_platform == 'win32'
+winrt-Windows.Media.Ocr>=1.0.21033.1 ; sys_platform == 'win32'
+winrt-Windows.Graphics.Imaging>=1.0.21033.1 ; sys_platform == 'win32'
+winrt-Windows.Storage.Streams>=1.0.21033.1 ; sys_platform == 'win32'
+winrt-runtime>=1.0.21033.1 ; sys_platform == 'win32'
+pytesseract>=0.3.10        # optional fallback (needs the Tesseract binary)
+
+# --- Misc ---------------------------------------------------------------
+rapidfuzz>=3.5             # fuzzy app-name / element-name matching
+packaging>=23.0

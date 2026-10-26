@@ -1,0 +1,7 @@
+-r requirements.txt
+
+pytest>=7.4
+pytest-timeout>=2.2
+pytest-qt>=4.2          # optional: only used when a display is available
+pyinstaller>=6.3        # builds JARVIS.exe
+ruff>=0.3               # lint
