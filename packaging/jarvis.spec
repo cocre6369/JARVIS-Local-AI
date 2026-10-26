@@ -68,7 +68,7 @@ HIDDEN_IMPORTS = [
 ]
 
 a = Analysis(
-    [str(ROOT / "jarvis" / "__main__.py")],
+    [str(ROOT / "packaging" / "launcher.py")],
     pathex=[str(ROOT)],
     binaries=[],
     datas=[],
