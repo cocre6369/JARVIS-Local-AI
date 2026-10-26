@@ -94,17 +94,30 @@ jobs:
           $exe = (Resolve-Path "dist\JARVIS\JARVIS.exe").Path
           $env:JARVIS_DEMO = "1"
           $env:JARVIS_DATA_DIR = "$env:TEMP\jarvis-ci-data"
-          # JARVIS.exe is a windowed (GUI-subsystem) app: PowerShell's '& exe'
-          # does NOT wait for those and leaves $LASTEXITCODE stale, so use
-          # Start-Process -Wait -PassThru and redirect the output to files.
-          $p = Start-Process -FilePath $exe -ArgumentList "version" -NoNewWindow -Wait -PassThru -RedirectStandardOutput smoke-version.log -RedirectStandardError smoke-version.err.log
-          Write-Host "--- frozen version (exit $($p.ExitCode)) ---"
-          Get-Content smoke-version.log, smoke-version.err.log | Write-Host
-          if ($p.ExitCode -ne 0) { throw "frozen exe 'version' failed with $($p.ExitCode)" }
-          $p = Start-Process -FilePath $exe -ArgumentList "doctor","--no-speech" -NoNewWindow -Wait -PassThru -RedirectStandardOutput smoke-doctor.log -RedirectStandardError smoke-doctor.err.log
-          Write-Host "--- frozen doctor (exit $($p.ExitCode)) ---"
-          Get-Content smoke-doctor.log, smoke-doctor.err.log | Select-Object -Last 60 | Write-Host
-          if ($p.ExitCode -notin 0, 3) { throw "frozen exe doctor failed with $($p.ExitCode)" }
+          # The frozen exe is a windowed app. In the runner's non-interactive
+          # session an error MessageBox would hang forever, so never use an
+          # unbounded -Wait: give it 180 s, kill it otherwise, and always dump
+          # the redirected stdout/stderr so a boot crash is visible in CI.
+          function Invoke-Frozen {
+            param([string]$Tag, [string[]]$Arguments)
+            $p = Start-Process -FilePath $exe -ArgumentList $Arguments -NoNewWindow -PassThru `
+                 -RedirectStandardOutput "smoke-$Tag.out.log" -RedirectStandardError "smoke-$Tag.err.log"
+            $hung = -not $p.WaitForExit(180000)
+            if ($hung) {
+              Write-Host "frozen exe '$Tag' was still running after 180 s - killing process tree"
+              try { $p.Kill($true) } catch {}
+            }
+            Write-Host "--- frozen '$Tag' stdout (hung=$hung, exit=$($p.ExitCode)) ---"
+            if (Test-Path "smoke-$Tag.out.log") { Get-Content "smoke-$Tag.out.log" -Tail 60 | Write-Host }
+            Write-Host "--- frozen '$Tag' stderr ---"
+            if (Test-Path "smoke-$Tag.err.log") { Get-Content "smoke-$Tag.err.log" -Tail 60 | Write-Host }
+            if ($hung) { return -1 }
+            return $p.ExitCode
+          }
+          $code = Invoke-Frozen "version" @("version")
+          if ($code -ne 0) { throw "frozen exe 'version' failed with $code" }
+          $code = Invoke-Frozen "doctor" @("doctor", "--no-speech")
+          if ($code -notin 0, 3) { throw "frozen exe 'doctor' failed with $code" }
           Write-Host "frozen exe runs"
           exit 0
 
@@ -146,7 +159,7 @@ jobs:
           $lines += (python -m jarvis.cli doctor --no-speech 2>&1 | Out-String)
           $lines += ("exit=" + $LASTEXITCODE)
           python -m PyInstaller packaging/jarvis.spec --noconfirm *> ci-pyinstaller.log
-          foreach ($f in "smoke-version.log","smoke-version.err.log","smoke-doctor.log","smoke-doctor.err.log") {
+          foreach ($f in "smoke-version.out.log","smoke-version.err.log","smoke-doctor.out.log","smoke-doctor.err.log") {
             if (Test-Path $f) { $lines += "=== $f ==="; $lines += (Get-Content $f -Tail 60 | Out-String) }
           }
           $lines += "=== pyinstaller (last 40 lines) ==="
