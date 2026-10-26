@@ -132,7 +132,10 @@ class FindElementTool(Tool):
         budget = default if wait_s is None else max(0.0, float(wait_s))
         deadline = time.time() + min(budget, max(ceiling, 0.0))
         while True:
-            found = vision.find_element(description, fresh=True)
+            # A higher floor than the internal default: acting on a control
+            # demands a real match, or JARVIS clicks whatever happens to be
+            # on screen (the "opened the README instead" class of bug).
+            found = vision.find_element(description, fresh=True, min_score=0.55)
             # A just-opened app is often still blank; a first miss is not an
             # answer - keep re-observing until the budget runs out.
             if found.get("match_dicts") or time.time() >= deadline:

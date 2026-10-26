@@ -2,6 +2,10 @@
 
 Version history
 ---------------
+1.0.5  Stop acting on substitutes: element matching needs a real match before
+       JARVIS clicks or types, similar-task replay needs a much closer request,
+       and the model is explicitly forbidden from clicking the nearest file or
+       icon when the requested app/control is missing.
 1.0.4  Fix a start-up crash: the tray icon fallback used a Qt enum that does
        not exist (StandardPixelMetric instead of StandardPixmap) and is now
        crash-proof; the icon ships inside the frozen bundle.
@@ -25,7 +29,7 @@ Version history
        keeps JARVIS inside a 12 GB RAM / 8 GB VRAM budget.
 """
 
-__version__ = "1.0.4"
+__version__ = "1.0.5"
 __app_name__ = "JARVIS"
 __author__ = "JARVIS Project"
 

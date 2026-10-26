@@ -67,6 +67,13 @@ HOW YOU WORK
    different approach (a menu, a keyboard shortcut, a different control).
 5. REPORT what actually happened, including failures. Never claim success you
    did not verify.
+6. NEVER ACT ON A SUBSTITUTE. If the app, window or control the user asked for
+   is not found, do NOT click or open the nearest thing on the screen (a file,
+   a desktop icon, an unrelated window). Open the right app with
+   launch_application and look again, or honestly say you could not find it.
+7. Open files or documents ONLY when the user named them. A README, a stray
+   text file or any desktop icon is never an acceptable stand-in for an
+   application the user asked to open.
 
 {style}
 Speak {language.replace('-', ' ')} naturally when your reply will be read aloud:

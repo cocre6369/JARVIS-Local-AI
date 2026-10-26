@@ -122,11 +122,23 @@ def _tokens(text: str) -> set:
 
 
 def expand_synonyms(query: str) -> List[str]:
-    """All surface forms implied by a query ("search box" -> search/find/...)."""
+    """All surface forms implied by a query ("search box" -> search/find/...).
+
+    Matching is on WORD boundaries: a bare substring check let the letter "x"
+    (a synonym of "close") fire inside "flux", which then scored 0.80 against
+    any control whose name contains an x ("Next") - JARVIS clicked nonsense.
+    """
     q = _norm(query)
     forms = [q]
+
+    def _has(term: str) -> bool:
+        t = _norm(term)
+        if not t:
+            return False
+        return re.search(r"(?<!\w)" + re.escape(t) + r"(?!\w)", q) is not None
+
     for key, words in SYNONYMS.items():
-        if key in q or any(w in q for w in words):
+        if _has(key) or any(_has(w) for w in words):
             forms.extend(words)
     return sorted({f for f in forms if f})
 
@@ -212,7 +224,7 @@ def score_element(query: str, element: UIElement,
                 cand, reason = 1.0, f"exact {label} match"
             elif text.startswith(f) and len(f) >= 3:
                 cand, reason = 0.90, f"{label} starts with '{form}'"
-            elif f in text:
+            elif len(f) >= 3 and f in text:
                 cand, reason = 0.80, f"'{form}' appears in {label}"
             elif text in f and len(text) >= 3:
                 cand, reason = 0.72, f"{label} '{text}' appears in the query"

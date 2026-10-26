@@ -12,8 +12,8 @@ machine through [Ollama](https://ollama.com).
 
 | File | What it is |
 |---|---|
-| **[JARVIS-Setup-1.0.4.exe](https://github.com/cocre6369/JARVIS-Local-AI/releases/download/v1.0.4/JARVIS-Setup-1.0.4.exe)** | **Recommended.** Double-click installer — no admin rights needed, creates desktop & Start Menu shortcuts, opens the first-run wizard. |
-| [JARVIS-portable-1.0.4.zip](https://github.com/cocre6369/JARVIS-Local-AI/releases/download/v1.0.4/JARVIS-portable-1.0.4.zip) | No-install version — unzip anywhere and run `JARVIS\JARVIS.exe`. |
+| **[JARVIS-Setup-1.0.5.exe](https://github.com/cocre6369/JARVIS-Local-AI/releases/download/v1.0.5/JARVIS-Setup-1.0.5.exe)** | **Recommended.** Double-click installer — no admin rights needed, creates desktop & Start Menu shortcuts, opens the first-run wizard. |
+| [JARVIS-portable-1.0.5.zip](https://github.com/cocre6369/JARVIS-Local-AI/releases/download/v1.0.5/JARVIS-portable-1.0.5.zip) | No-install version — unzip anywhere and run `JARVIS\JARVIS.exe`. |
 
 New releases always appear on the **[Releases page](https://github.com/cocre6369/JARVIS-Local-AI/releases)**;
 the "latest release" link above automatically points at the newest one.
